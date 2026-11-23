@@ -163,6 +163,20 @@ exception when others then
   if sqlerrm like 'SECURITY:%' then raise; end if;
 end $$;
 
+-- Signed-out callers can't reach the app's functions at all.
+reset role;
+set role anon;
+do $$ begin
+  perform public.complete_milestone(gen_random_uuid());
+  raise exception 'SECURITY: anon called complete_milestone';
+exception when insufficient_privilege then null;
+end $$;
+do $$ begin
+  perform public.add_note(gen_random_uuid(), 'x');
+  raise exception 'SECURITY: anon called add_note';
+exception when insufficient_privilege then null;
+end $$;
+
 reset role;
 \o
 \echo All schema checks passed.
