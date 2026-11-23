@@ -4,7 +4,9 @@ Name: **GetToIt**. Tagline: *Bring practice to your purpose.*
 ("Cairn" was dropped: an existing private journaling app uses it.)
 
 ## Product
-- Personal goal app for one user. Calm, simple, encouraging; never punishing.
+- **Tone: inspire action, stay calm.** Copy points at the next concrete step ("Your next big move", "Let's get to it").
+  Misses are never punished, but the response to a miss is "start now", not "that's fine".
+- Personal goal app for one user. Calm and rewarding to use, built to get you moving; never punishing.
 - Mobile-first (iOS primary). Web companion for planning and long-form notes.
 - Morning flow: one daily digest notification → today's thought → Today screen.
 - Daily thoughts: curated library **plus** phrases the user adds or saves (option C).
