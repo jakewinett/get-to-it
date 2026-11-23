@@ -499,7 +499,7 @@ insert into public.badge_catalog (key, name, how, glyph, repeatable, position) v
   ('first-step',  'First Step',  'Complete your first milestone.',                                     'flag',     false, 1),
   ('showing-up',  'Showing Up',  'Make progress on 3 days in a week.',                                  'sunrise',  true,  2),
   ('steady',      'Steady',      'Make progress on 5 days in a week. Any 5, not 5 in a row.',          'wave',     true,  3),
-  ('fresh-start', 'Fresh Start', 'Come back after a few days away. Returning is a skill.',             'seedling', true,  4),
+  ('fresh-start', 'Fresh Start', 'Get back to it after 3 or more days away. Restarting is a skill you''re practicing.', 'seedling', true,  4),
   ('halfway',     'Halfway',     'Reach the midpoint of any goal.',                                     'half',     true,  5),
   ('summit',      'Summit',      'Complete a goal.',                                                    'mountain', true,  6),
   ('long-game',   'Long Game',   'Reach a milestone on a long-term goal.',                              'compass',  true,  7),
@@ -507,9 +507,9 @@ insert into public.badge_catalog (key, name, how, glyph, repeatable, position) v
   ('balanced',    'Balanced',    'Make progress in three categories in one week.',                      'balance',  true,  9);
 
 insert into public.thoughts (kind, body, subline, source) values
-  ('thought',  'Small steps still move you forward.',     'You don''t have to do everything today. Just the next thing.', null),
-  ('thought',  'Progress counts, even when it''s quiet.', 'Some days the win is simply showing up.',                       null),
-  ('thought',  'Begin again as often as you need.',       'A missed day is a pause, not a verdict.',                      null),
+  ('thought',  'Start with the next step.',               'Not the whole plan. One move, done today.',                    null),
+  ('thought',  'Practice beats intention.',               'Ten focused minutes today beat a perfect plan for tomorrow.',  null),
+  ('thought',  'Missed yesterday? Start today.',          'The fastest way back is the next step, right now.',            null),
   ('quote',    'The journey of a thousand miles begins with a single step.', null, 'Lao Tzu, Tao Te Ching'),
   ('buddhist', 'Drop by drop is the water pot filled. Likewise, the wise one, gathering it little by little, fills themselves with good.', null, 'Adapted from the Dhammapada, verse 122'),
   ('idiom',    'Fall down seven times, get up eight.',     null, 'Japanese proverb, nana korobi ya oki'),

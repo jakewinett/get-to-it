@@ -1,4 +1,4 @@
-<title>GetToIt Prototype</title>
+<title>Get To It Prototype</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -310,9 +310,9 @@ input[type="time"].field { width: auto; padding: 8px 10px; }
   </div>
 
   <aside class="panel" aria-label="About this prototype">
-    <div class="brand"><span class="mark" id="brandMark"></span><b>GetToIt</b></div>
+    <div class="brand"><span class="mark" id="brandMark"></span><b>Get To It</b></div>
     <p style="font-family:var(--font-quiet);font-style:italic;font-size:17px;color:var(--ink)">Bring practice to your purpose.</p>
-    <p>Click-through prototype, round two. The goals are made-up examples, and nothing is saved yet.</p>
+    <p>Click-through prototype, round three. The goals are made-up examples, and nothing is saved yet.</p>
     <h4>Try this</h4>
     <ol>
       <li>Tap the morning notification.</li>
@@ -367,11 +367,11 @@ const GLYPHS = {
 };
 
 const STARTER_PHRASES = [
-  { line: "Small steps still move you forward.", sub: "You don't have to do everything today. Just the next thing." },
-  { line: "Progress counts, even when it's quiet.", sub: "Some days the win is simply showing up." },
-  { line: "Begin again as often as you need.", sub: "A missed day is a pause, not a verdict." },
+  { line: "Start with the next step.", sub: "Not the whole plan. One move, done today." },
+  { line: "Practice beats intention.", sub: "Ten focused minutes today beat a perfect plan for tomorrow." },
+  { line: "Missed yesterday? Start today.", sub: "The fastest way back is the next step, right now." },
 ];
-const ENCOURAGE = ["Nicely done. One more step behind you.", "That's progress, and it counts.", "Good work. Momentum is building.", "One step closer."];
+const ENCOURAGE = ["Done. What's next?", "Nice work. On to the next one.", "Checked off. Keep the momentum.", "Good. Carry that into the next one."];
 const MAX_FOCUS = 5;
 const NEW_COLORS = ["var(--c4)", "var(--c5)", "var(--c6)"];
 const HORIZONS = { short: "Short term", mid: "Mid term", long: "Long term" };
@@ -420,7 +420,7 @@ function freshState() {
       { id: "first-step", name: "First Step", glyph: "flag", how: "Complete your first milestone.", count: 1, earned: "Oct 28" },
       { id: "showing-up", name: "Showing Up", glyph: "sunrise", how: "Make progress on 3 days in a week.", count: 4, earned: "Nov 15" },
       { id: "steady", name: "Steady", glyph: "wave", how: "Make progress on 5 days in a week. Any 5, not 5 in a row.", count: 0 },
-      { id: "fresh-start", name: "Fresh Start", glyph: "seedling", how: "Come back after a few days away. Returning is a skill.", count: 1, earned: "Nov 9" },
+      { id: "fresh-start", name: "Fresh Start", glyph: "seedling", how: "Get back to it after 3 or more days away. Restarting is a skill you're practicing.", count: 1, earned: "Nov 9" },
       { id: "halfway", name: "Halfway", glyph: "half", how: "Reach the midpoint of any goal.", count: 0 },
       { id: "summit", name: "Summit", glyph: "mountain", how: "Complete a goal.", count: 0 },
       { id: "long-game", name: "Long Game", glyph: "compass", how: "Reach a milestone on a long-term goal.", count: 1, earned: "Nov 2" },
@@ -480,10 +480,10 @@ function lockScreen() {
     <div class="time">7:30</div>
     <button class="notif" data-act="go:meditate">
       <span class="appicon">${ICONS.cairn}</span>
-      <span><span class="spread"><b>GetToIt</b><span class="small muted">now</span></span>
-      <p>Good morning. Today's thought is ready, plus ${n} small steps across your goals.</p></span>
+      <span><span class="spread"><b>Get To It</b><span class="small muted">now</span></span>
+      <p>Good morning. ${n} steps today. First up: ${esc(goal(S.focus[0][0]).milestones[S.focus[0][1]].t)}.</p></span>
     </button>
-    <div class="hint">One gentle digest each morning. That's it.</div>
+    <div class="hint">One morning digest. Everything you need to get moving.</div>
   </div>`;
 }
 
@@ -501,7 +501,7 @@ function meditateScreen() {
       <button class="btn ghost" data-act="addthought">Add your own</button>
     </div>
     <p class="small muted" style="margin:0">Take three slow breaths before you start.</p>
-    <button class="btn block" data-act="go:today">Start my day</button>
+    <button class="btn block" data-act="go:today">Let's get to it</button>
   </div>`;
 }
 
@@ -523,7 +523,7 @@ function todayScreen() {
     </div>`;
   }).join("");
   const [ngid, ni] = S.nudge; const ng = goal(ngid); const nm = ng.milestones[ni];
-  const weekMsg = active >= 5 ? "A steady week. Well done." : active >= 3 ? "Good rhythm this week." : "Every step counts, whenever it happens.";
+  const weekMsg = active >= 5 ? "Strong week. Keep it going." : active >= 3 ? `${5 - active} more day${5 - active === 1 ? "" : "s"} to earn Steady.` : "Check one thing off to make today count.";
 
   return `
     <div class="spread" style="margin-top:6px">
@@ -539,7 +539,7 @@ function todayScreen() {
     <h2>Today's focus <span style="text-transform:none;letter-spacing:0;font-weight:600">· ${doneToday} of ${S.focus.length}</span></h2>
     <div class="card focus">${focus}</div>
     <div class="focus-foot">
-      <span class="small muted">${doneToday === S.focus.length ? "That's everything for today. Anything more is a bonus." : "Picked for you by what's due soonest."}</span>
+      <span class="small muted">${doneToday === S.focus.length ? "All done. Got energy left? Add another step." : "Ordered by what's due first."}</span>
       ${S.focus.length < MAX_FOCUS ? `<button class="btn ghost" style="padding:8px 4px;white-space:nowrap" data-act="addfocus">+ Add a step</button>` : ""}
     </div>
 
@@ -547,14 +547,14 @@ function todayScreen() {
     <div class="card">
       <div class="spread"><b>${active} of the last 7 days</b><span class="small muted">${weekMsg}</span></div>
       <div class="week">${week}</div>
-      <p class="small muted" style="margin:12px 0 0">Missed days don't reset anything. Pick up wherever you are.</p>
+      <p class="small muted" style="margin:12px 0 0">Missed days don't reset anything. Today counts the moment you check something off.</p>
     </div>
 
-    <h2>When you're ready</h2>
+    <h2>Your next big move</h2>
     <button class="card linkish" data-act="goal:${ngid}" style="display:block">
       <span class="catlabel"><span class="dot" style="background:${cat(ng.cat).color}"></span>Long term · ${esc(ng.title)}</span>
       <div style="font-weight:600;margin-top:6px">${esc(nm.done ? "You've taken this step. Nice." : nm.t)}</div>
-      <div class="small muted" style="margin-top:2px">No deadline. A small nudge so the big goal stays in view.</div>
+      <div class="small muted" style="margin-top:2px">No due date. One step that keeps the big goal moving.</div>
     </button>`;
 }
 
@@ -596,7 +596,7 @@ function goalScreen() {
     ? g.notes.map(n => `<div class="note"><div class="d">${esc(n.d)}</div><p>${esc(n.t)}</p></div>`).join("")
     : `<p class="small muted" style="margin:4px 0 0">No updates yet. How is this going? A sentence is plenty.</p>`;
   const pct = Math.round(progress(g) * 100);
-  const msg = pct === 100 ? "Complete. Take a moment to enjoy it." : pct >= 50 ? "Past the halfway mark." : d > 0 ? "Underway. Keep it light." : "Ready when you are.";
+  const msg = pct === 100 ? "Complete. Time to pick the next challenge." : pct >= 50 ? "Past halfway. Push for the next milestone." : d > 0 ? "In motion. Line up the next milestone." : "Not started. Check off the first milestone this week.";
   return `
     <button class="back" data-act="back">${ICONS.left}Goals</button>
     <div style="margin-top:6px"><span class="catlabel"><span class="dot" style="background:${c.color}"></span>${esc(c.name)} · ${HORIZONS[g.horizon]}</span></div>
@@ -637,7 +637,7 @@ function badgesScreen() {
     </div>
     <h2>Collection</h2>
     <div class="badge-grid">${tiles}</div>
-    <p class="small muted" style="margin:16px 2px 0">Badges reward showing up and coming back. None of them can be lost.</p>`;
+    <p class="small muted" style="margin:16px 2px 0">Badges reward action and comebacks. Once earned, they're yours.</p>`;
 }
 
 function remindersScreen() {
@@ -647,11 +647,11 @@ function remindersScreen() {
     <h1 style="margin-top:6px">Settings</h1>
 
     <h2>Reminders</h2>
-    <p class="small muted" style="margin:-4px 0 10px">One notification a day, with everything in it. No nagging.</p>
+    <p class="small muted" style="margin:-4px 0 10px">One notification a day with today's steps. Nothing else.</p>
     <div class="card" style="padding-block:4px">
       <div class="setting"><div class="t"><b>Morning digest</b><span>Today's thought and your next few steps</span></div>
         <input type="time" class="field" id="digestTime" value="${p.time}" aria-label="Digest time"></div>
-      <div class="setting"><div class="t"><b>Long-term nudges</b><span>Include one step toward a big goal, no deadline</span></div>
+      <div class="setting"><div class="t"><b>Long-term nudges</b><span>Add one step toward a big goal to each digest</span></div>
         <button class="toggle" aria-pressed="${p.longNudge}" aria-label="Long-term nudges" data-act="pref:longNudge"></button></div>
       <div class="setting"><div class="t"><b>Sunday recap</b><span>What you moved forward this week</span></div>
         <button class="toggle" aria-pressed="${p.recap}" aria-label="Sunday recap" data-act="pref:recap"></button></div>
@@ -665,7 +665,7 @@ function remindersScreen() {
 
     <h2>Voice</h2>
     <div class="card" style="padding-block:4px">
-      <div class="setting"><div class="t"><b>Speak replies with headphones</b><span>GetToIt talks back when headphones are connected</span></div>
+      <div class="setting"><div class="t"><b>Speak replies with headphones</b><span>Get To It talks back when headphones are connected</span></div>
         <button class="toggle" aria-pressed="${S.voiceHeadphones}" aria-label="Speak replies with headphones" data-act="voice:voiceHeadphones"></button></div>
       <div class="setting"><div class="t"><b>Speak replies without headphones</b><span>Off keeps replies silent, as text</span></div>
         <button class="toggle" aria-pressed="${S.voiceAlways}" aria-label="Speak replies without headphones" data-act="voice:voiceAlways"></button></div>
@@ -674,8 +674,8 @@ function remindersScreen() {
     <h2>Notification preview</h2>
     <div class="card row" style="align-items:flex-start">
       <span class="iconbtn" style="background:var(--accent);border:0;border-radius:10px;width:38px;height:38px;color:var(--accent-ink)">${ICONS.cairn}</span>
-      <div style="min-width:0"><b>GetToIt</b><p style="margin:2px 0 0">${p.tone === "encouraging"
-        ? "Good morning. Today's thought is ready, plus 3 small steps across your goals."
+      <div style="min-width:0"><b>Get To It</b><p style="margin:2px 0 0">${p.tone === "encouraging"
+        ? "Good morning. 3 steps today. First up: Draft the agenda and send it over."
         : "3 steps today: workshop agenda, 3-mile run, module 3."}</p></div>
     </div>`;
 }
@@ -706,7 +706,7 @@ function matchGoal(q) {
 function goalSummary(g) {
   const d = doneCount(g), n = g.milestones.length, next = nextMs(g), last = g.notes[0];
   const pct = progress(g);
-  const tone = pct === 1 ? "It's complete." : pct >= .5 ? "You're past the halfway mark." : d ? "It's moving." : "It hasn't started yet, and that's fine.";
+  const tone = pct === 1 ? "It's complete." : pct >= .5 ? "You're past halfway. Keep pushing." : d ? "It's in motion." : "It hasn't started. Pick a first step today.";
   return {
     html: `<p><b>${esc(g.title)}</b>: ${d} of ${n} milestones done. ${tone}</p>${next ? `<p>Next up: ${esc(next.t)}${next.when ? ` (${esc(next.when)})` : ""}.</p>` : ""}${last ? `<p class="src">Your last note, ${esc(last.d)}: "${esc(last.t)}"</p>` : ""}`,
     say: `${g.title}: ${d} of ${n} milestones done. ${tone} ${next ? "Next up: " + next.t + "." : ""}`,
@@ -783,17 +783,17 @@ function assistantScreen() {
   const label = S.headphones ? (S.voiceHeadphones ? "Headphones connected · replies spoken" : "Headphones connected · replies in text") : (S.voiceAlways ? "Replies spoken aloud" : "No headphones · replies in text");
   const icon = S.headphones ? ICONS.headphones : on ? ICONS.speaker : ICONS.mute;
   const msgs = S.chat.length ? S.chat.map(m => `<div class="msg ${m.role}">${m.html}${m.actions && m.actions.length ? `<div class="msg-actions">${m.actions.map(a => `<button class="pill" data-act="${a.act}">${esc(a.label)}</button>`).join("")}</div>` : ""}${m.spoken ? `<div class="spoke">${ICONS.speaker}Spoken</div>` : ""}</div>`).join("")
-    : `<div class="ask-empty"><div class="quiet" style="font-size:25px">What's on your mind?</div><p class="small muted" style="margin:8px auto 0;max-width:30ch">Ask about a goal, log an update, add something new, or ask for a little inspiration.</p>
+    : `<div class="ask-empty"><div class="quiet" style="font-size:25px">What are we working on?</div><p class="small muted" style="margin:8px auto 0;max-width:30ch">Ask about a goal, log what you did, add something new, or get a push of inspiration.</p>
        <div class="suggest">${SUGGEST.map(x => `<button class="pill" data-act="askchip" data-q="${esc(x)}">${esc(x)}</button>`).join("")}</div></div>`;
   const composer = S.listening
     ? `<div class="listening"><span class="row" style="gap:10px"><span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>Listening…</span><button class="btn ghost" data-act="stoplisten">Cancel</button></div>`
-    : `<form class="composer-row" id="askForm"><input class="field" id="askInput" placeholder="Ask or tell GetToIt anything" autocomplete="off" aria-label="Message">
+    : `<form class="composer-row" id="askForm"><input class="field" id="askInput" placeholder="Ask, or tell me what you did" autocomplete="off" aria-label="Message">
        <button type="submit" class="send" aria-label="Send">${ICONS.send}</button>
        <button type="button" class="mic" aria-label="Speak" data-act="listen">${ICONS.mic}</button></form>`;
   return `<div class="ask">
     <div class="ask-head">
       <button class="iconbtn" aria-label="Close" data-act="go:${S.prev}">${ICONS.close}</button>
-      <b style="font-size:16px">Ask GetToIt</b>
+      <b style="font-size:16px">Ask</b>
       <span style="width:40px"></span>
     </div>
     <div class="voicebar ${on ? "on" : ""}">${icon}<span>${label}</span>${S.headphones ? "" : `<button class="toggle sm" aria-pressed="${S.voiceAlways}" aria-label="Speak replies without headphones" data-act="voice:voiceAlways"></button>`}</div>
@@ -829,15 +829,15 @@ function openNudge(gid, i) {
     <div class="sheet" role="dialog" aria-label="Break this step down" data-stop>
       <div class="grabber"></div>
       <b style="font-size:18px">This step keeps moving</b>
-      <p class="muted" style="margin:8px 0 0">"${esc(m.t)}" has been swapped out three days running. That usually means the step is too big, not that you're falling short.</p>
-      <p style="margin:12px 0 0;font-weight:600">Want to break it into smaller pieces?</p>
+      <p class="muted" style="margin:8px 0 0">"${esc(m.t)}" has been swapped out three days running. That usually means it's too big to start. Break it into pieces you can finish today.</p>
+      <p style="margin:12px 0 0;font-weight:600">What are the smaller pieces?</p>
       <div class="stack" style="margin-top:12px">
         <input class="field" id="bd1" placeholder="e.g. Watch the first two lessons" aria-label="Smaller step 1">
         <input class="field" id="bd2" placeholder="e.g. Do the lab exercise" aria-label="Smaller step 2">
         <input class="field" id="bd3" placeholder="e.g. Take the module quiz" aria-label="Smaller step 3">
       </div>
       <button class="btn block" style="margin-top:16px" data-act="breakdown:${gid}:${i}">Break it down</button>
-      <button class="btn ghost block" style="margin-top:4px" data-act="keepstep:${gid}:${i}">Keep it as is</button>
+      <button class="btn ghost block" style="margin-top:4px" data-act="keepstep:${gid}:${i}">Keep it. I'll do it tomorrow.</button>
     </div>
   </div>`;
 }
@@ -877,7 +877,7 @@ function openAddSheet() {
         <input class="field" id="gm2" placeholder="Milestone 2" aria-label="Milestone 2">
         <input class="field" id="gm3" placeholder="Milestone 3" aria-label="Milestone 3">
       </div>
-      <p class="small muted" style="margin:8px 0 18px">Start small. You can add or change milestones any time.</p>
+      <p class="small muted" style="margin:8px 0 18px">Make the first milestone something you can finish this week.</p>
       <button class="btn block" data-act="savegoal">Save goal</button>
     </div>
   </div>`;
@@ -909,7 +909,7 @@ function openPicker(mode, idx) {
       <div class="grabber"></div>
       <div class="spread"><b style="font-size:18px">${mode === "swap" ? "Swap this step" : "Add a step to today"}</b><button class="btn ghost" data-act="closesheet">Cancel</button></div>
       <p class="small muted" style="margin:4px 0 16px">${mode === "swap"
-        ? `Replacing "${esc(current)}". It stays on its goal for another day.`
+        ? `Replacing "${esc(current)}". It stays on the goal for tomorrow.`
         : `Choose the next step from any goal. Today's list holds up to ${MAX_FOCUS}.`}</p>
       <div class="stack">${rows}</div>
     </div>
@@ -988,7 +988,7 @@ function go(screen) {
 
 const SCREENS = { lock: lockScreen, meditate: meditateScreen, today: todayScreen, goals: goalsScreen, goal: goalScreen, badges: badgesScreen, reminders: remindersScreen, assistant: assistantScreen };
 const TABS = [["today", "Today", ICONS.sun], ["goals", "Goals", ICONS.goals], ["assistant", "Ask", ICONS.mic], ["badges", "Badges", ICONS.award]];
-const JUMPS = [["lock", "Morning notification"], ["meditate", "Today's thought"], ["today", "Today"], ["swap", "Swap a step"], ["goals", "Goals"], ["goal", "Goal detail"], ["add", "New goal"], ["badges", "Badges"], ["assistant", "Ask GetToIt"], ["reminders", "Settings"]];
+const JUMPS = [["lock", "Morning notification"], ["meditate", "Today's thought"], ["today", "Today"], ["swap", "Swap a step"], ["goals", "Goals"], ["goal", "Goal detail"], ["add", "New goal"], ["badges", "Badges"], ["assistant", "Ask"], ["reminders", "Settings"]];
 
 function render(resetScroll) {
   const scr = $("#screen");
@@ -1001,7 +1001,7 @@ function render(resetScroll) {
   tabbar.hidden = !showTabs;
   const activeTab = S.screen === "goal" ? "goals" : S.screen === "reminders" ? "today" : S.screen;
   tabbar.innerHTML = TABS.map(([id, label, icon]) => id === "assistant"
-    ? `<button class="ask-tab" data-act="go:assistant" aria-label="Ask GetToIt"><span>${icon}</span>${label}</button>`
+    ? `<button class="ask-tab" data-act="go:assistant" aria-label="Ask"><span>${icon}</span>${label}</button>`
     : `<button data-act="go:${id}" ${activeTab === id ? 'aria-current="page"' : ""}>${icon}${label}</button>`).join("");
   const msgs = $("#msgs"); if (msgs) msgs.scrollTop = msgs.scrollHeight;
   const hp = $("#hpToggle"); if (hp) hp.setAttribute("aria-pressed", S.headphones);
@@ -1045,7 +1045,7 @@ document.addEventListener("click", e => {
       $("#overlay").innerHTML = ""; render();
       toast(`Broken into ${steps.length} steps. The first one is on today's list.`); break;
     }
-    case "keepstep": S.swapCounts[a + ":" + b] = 0; $("#overlay").innerHTML = ""; toast("Kept as is. No problem."); break;
+    case "keepstep": S.swapCounts[a + ":" + b] = 0; $("#overlay").innerHTML = ""; toast("Kept. It's on tomorrow's list."); break;
     case "voice": S[a] = !S[a]; render(); break;
     case "headphones": S.headphones = !S.headphones; render(); if (S.screen !== "assistant") toast(S.headphones ? "Headphones connected (simulated)." : "Headphones disconnected (simulated)."); break;
     case "askchip": sendAsk(el.dataset.q); break;
@@ -1059,13 +1059,13 @@ document.addEventListener("click", e => {
     case "aimark": {
       const g = goal(a), m = g.milestones[+b];
       if (m.done) return;
-      S.chat.push({ role: "ai", html: `<p>Marked "${esc(m.t)}" done. One more step behind you.</p>`, spoken: willSpeak() });
-      if (willSpeak()) speak("Marked done. One more step behind you.");
+      S.chat.push({ role: "ai", html: `<p>Marked "${esc(m.t)}" done. What's next?</p>`, spoken: willSpeak() });
+      if (willSpeak()) speak("Marked done. What's next?");
       toggleMilestone(a, +b); break;
     }
     case "undo": {
       S.goals = S.goals.filter(g => g.id !== a);
-      S.chat.push({ role: "ai", html: "<p>Removed it. No problem.</p>" }); render(); break;
+      S.chat.push({ role: "ai", html: "<p>Removed it.</p>" }); render(); break;
     }
     case "swap": openPicker("swap", +a); break;
     case "addfocus": openPicker("add"); break;
@@ -1078,7 +1078,7 @@ document.addEventListener("click", e => {
         S.swapCounts[key] = (S.swapCounts[key] || 0) + 1;
         S.focus[S.pick.idx] = entry; render();
         if (S.swapCounts[key] >= 3) setTimeout(() => openNudge(og, oi), 350);
-        else toast("Swapped. The other step will come back another day.");
+        else toast("Swapped. The other step comes back tomorrow.");
       } else { S.focus.push(entry); render(); toast("Added to today."); }
       break;
     }
@@ -1129,7 +1129,7 @@ document.addEventListener("click", e => {
       const g = { id: "g" + Date.now(), title, cat: c, horizon: h, target: $("#gTarget").value.trim() || "no set date", milestones: ms.length ? ms : [{ t: "Decide on a first small step" }], notes: [] };
       S.goals.push(g); S.filter = "all"; S.goalId = g.id;
       $("#overlay").innerHTML = ""; go("goal");
-      toast("Goal added. Your first milestone is waiting.");
+      toast("Goal added. Knock out the first milestone this week.");
       break;
     }
   }
