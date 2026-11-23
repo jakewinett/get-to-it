@@ -1,0 +1,1153 @@
+<title>GetToIt Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<style>
+/* Layout: one phone frame centered on a quiet ground, prototype notes beside it on desktop and below it on phones. */
+:root {
+  --ground: #E9EEEF;
+  --surface: #F6F8F8;
+  --card: #FFFFFF;
+  --ink: #1C2A30;
+  --muted: #5B6B72;
+  --line: #DCE4E6;
+  --accent: #2C6A77;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #DDEBEE;
+  --gold: #A97A22;
+  --gold-soft: #F4E8CF;
+  --frame: #1C2A30;
+  --dawn-a: #C9D9DE;
+  --dawn-b: #EAD9C6;
+  --glass: rgba(255,255,255,.62);
+  --pro: #4A6EA3;
+  --per: #B0627A;
+  --phy: #4F8757;
+  --c4: #7B66A8;
+  --c5: #2F8A84;
+  --c6: #9A7043;
+  --shadow: 0 1px 2px rgba(28,42,48,.06), 0 8px 24px rgba(28,42,48,.06);
+  --font-ui: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-quiet: "Newsreader", Georgia, "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0B1012; --surface: #121A1D; --card: #1A2428; --ink: #E5EDEF; --muted: #93A4AA;
+    --line: #2A383D; --accent: #80C1CD; --accent-ink: #0E1A1D; --accent-soft: #1E3A40;
+    --gold: #E2B865; --gold-soft: #3A301C; --frame: #2A383D; --dawn-a: #1C2E35; --dawn-b: #3A2E27;
+    --glass: rgba(26,36,40,.72); --pro: #8EADDA; --per: #DE9CAE; --phy: #95C59B; --c4: #B6A3DF; --c5: #7FCBC4; --c6: #D3AA7C;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #0B1012; --surface: #121A1D; --card: #1A2428; --ink: #E5EDEF; --muted: #93A4AA;
+  --line: #2A383D; --accent: #80C1CD; --accent-ink: #0E1A1D; --accent-soft: #1E3A40;
+  --gold: #E2B865; --gold-soft: #3A301C; --frame: #2A383D; --dawn-a: #1C2E35; --dawn-b: #3A2E27;
+  --glass: rgba(26,36,40,.72); --pro: #8EADDA; --per: #DE9CAE; --phy: #95C59B; --c4: #B6A3DF; --c5: #7FCBC4; --c6: #D3AA7C;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--ground); color: var(--ink); font-family: var(--font-ui); font-size: 15px; line-height: 1.45; }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+.stage {
+  display: flex; gap: 48px; justify-content: center; align-items: flex-start; flex-wrap: wrap;
+  padding-block: 32px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Phone */
+.phone {
+  width: 390px; max-width: 100%; height: 844px;
+  background: var(--surface); border: 10px solid var(--frame); border-radius: 52px;
+  position: relative; overflow: hidden; display: flex; flex-direction: column;
+  box-shadow: 0 30px 60px rgba(28,42,48,.18);
+}
+.statusbar { display: flex; justify-content: space-between; align-items: center; padding: 14px 28px 4px; font-size: 13px; font-weight: 600; flex: none; }
+.statusbar .dots { display: flex; gap: 5px; align-items: center; }
+.statusbar .dots i { width: 16px; height: 9px; border: 1.5px solid currentColor; border-radius: 3px; display: block; }
+.statusbar .dots b { width: 4px; height: 4px; background: currentColor; border-radius: 50%; display: block; }
+.screen { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 8px 20px 28px; scrollbar-width: none; }
+.screen::-webkit-scrollbar { display: none; }
+.screen.full { padding: 0; }
+
+.tabbar { display: flex; flex: none; border-top: 1px solid var(--line); background: var(--card); padding: 8px 8px 22px; }
+.tabbar button { flex: 1; border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; font-weight: 600; color: var(--muted); padding: 4px 0; }
+.tabbar button[aria-current="page"] { color: var(--accent); }
+.tabbar svg { width: 22px; height: 22px; }
+
+/* Type */
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+h1 { font-size: 28px; line-height: 1.15; font-weight: 700; margin: 4px 0 0; letter-spacing: -.01em; text-wrap: balance; }
+h2 { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 28px 0 10px; }
+.quiet { font-family: var(--font-quiet); font-style: italic; font-weight: 400; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+/* Shared pieces */
+.row { display: flex; align-items: center; gap: 12px; }
+.spread { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.card { background: var(--card); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); }
+.iconbtn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); display: grid; place-items: center; flex: none; }
+.iconbtn svg { width: 20px; height: 20px; }
+.btn { border: 0; border-radius: 999px; padding: 14px 22px; font-weight: 600; background: var(--accent); color: var(--accent-ink); }
+.btn.ghost { background: transparent; color: var(--accent); padding: 10px 14px; }
+.btn.block { width: 100%; }
+.pill { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 7px 13px; font-size: 13px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+.pill[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
+.back { border: 0; background: none; color: var(--accent); font-weight: 600; padding: 6px 0; display: inline-flex; align-items: center; gap: 2px; }
+.back svg { width: 20px; height: 20px; }
+
+/* Checkbox */
+.check { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line); background: var(--card); display: grid; place-items: center; flex: none; transition: background .2s, border-color .2s; padding: 0; }
+.check svg { width: 14px; height: 14px; opacity: 0; color: var(--accent-ink); }
+.check[aria-checked="true"] { background: var(--accent); border-color: var(--accent); }
+.check[aria-checked="true"] svg { opacity: 1; }
+.check.pop { animation: pop .35s ease; }
+@keyframes pop { 50% { transform: scale(1.18); } }
+
+/* Lock screen */
+.lock { height: 100%; background: linear-gradient(170deg, var(--dawn-a), var(--dawn-b)); padding: 40px 16px 24px; display: flex; flex-direction: column; align-items: center; }
+.lock .date { font-size: 17px; font-weight: 600; opacity: .8; }
+.lock .time { font-size: 84px; font-weight: 600; letter-spacing: -.03em; line-height: 1; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.notif { margin-top: auto; margin-bottom: 70px; width: 100%; text-align: left; border: 0; background: var(--glass); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-radius: 22px; padding: 14px 16px; display: flex; gap: 12px; animation: rise .6s ease both .3s; }
+.notif .appicon { width: 38px; height: 38px; border-radius: 10px; background: var(--accent); display: grid; place-items: center; flex: none; }
+.notif .appicon svg { width: 24px; height: 24px; color: var(--accent-ink); }
+.notif b { font-size: 14px; }
+.notif p { margin: 2px 0 0; font-size: 14px; line-height: 1.35; }
+.lock .hint { font-size: 13px; opacity: .7; }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+
+/* Meditation */
+.meditate { min-height: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 28px 36px; gap: 18px; }
+.breath { width: 150px; height: 150px; margin: 22px 0 6px; position: relative; display: grid; place-items: center; }
+.breath::before, .breath::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--accent-soft); animation: breathe 8s ease-in-out infinite; }
+.breath::after { inset: 28px; background: var(--accent); opacity: .18; animation-delay: .4s; }
+.breath span { position: relative; font-size: 13px; font-weight: 600; color: var(--accent); }
+@keyframes breathe { 0%, 100% { transform: scale(.72); } 50% { transform: scale(1); } }
+.phrase { font-family: var(--font-quiet); font-size: 31px; line-height: 1.22; font-weight: 400; margin: 0; text-wrap: balance; }
+.meditate .sub { color: var(--muted); max-width: 30ch; margin: 0; }
+.meditate .btn { margin-top: auto; }
+
+/* Today */
+.thought { display: block; width: 100%; text-align: left; border: 0; background: var(--accent-soft); border-radius: 18px; padding: 16px; margin-top: 18px; }
+.thought .quiet { font-size: 19px; line-height: 1.3; display: block; margin-top: 4px; }
+.week { display: flex; justify-content: space-between; margin-top: 14px; }
+.week div { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--muted); }
+.week i { width: 30px; height: 30px; border-radius: 50%; border: 2px dashed var(--line); display: block; }
+.week i.on { border: 0; background: var(--accent); }
+.week i.today { border-style: solid; border-color: var(--accent); }
+.week i.on.today { box-shadow: 0 0 0 3px var(--accent-soft); }
+.focus { display: flex; flex-direction: column; gap: 10px; }
+.focus-item { display: flex; gap: 12px; align-items: flex-start; }
+.focus-item .body { flex: 1; min-width: 0; }
+.focus-item .what { font-weight: 600; }
+.focus-item.done .what { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+.focus-item .meta { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+.swap { border: 0; background: none; color: var(--muted); width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; flex: none; margin: -4px -6px 0 0; }
+.swap:hover { background: var(--surface); color: var(--accent); }
+.swap svg { width: 18px; height: 18px; }
+.focus-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 6px 2px 0; }
+.pick { display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left; border: 0; background: var(--card); border-radius: 14px; padding: 12px 14px; }
+.pick:hover { box-shadow: var(--shadow); }
+.pick .body { flex: 1; min-width: 0; }
+.pick .dot { margin-top: 7px; }
+.linkish { border: 0; background: none; padding: 0; text-align: left; width: 100%; }
+
+/* Goals */
+.chips { display: flex; gap: 8px; overflow-x: auto; margin: 16px -20px 0; padding: 0 20px 4px; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.goal-card { display: block; width: 100%; text-align: left; border: 0; margin-bottom: 10px; }
+.goal-card .title { font-weight: 600; font-size: 16px; margin: 6px 0 10px; }
+.bar { height: 6px; background: var(--line); border-radius: 999px; overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 999px; transition: width .4s ease; }
+.goal-card .foot { font-size: 13px; color: var(--muted); margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.catlabel { font-size: 12px; font-weight: 600; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+
+/* Goal detail */
+.ms { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.ms:last-child { border-bottom: 0; }
+.ms .t { flex: 1; min-width: 0; }
+.ms.done .t { color: var(--muted); }
+.ms .when { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.inline-add { display: flex; gap: 8px; margin-top: 10px; }
+.field { width: 100%; border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 11px 13px; }
+textarea.field { resize: none; min-height: 76px; }
+.note { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.note:last-child { border-bottom: 0; }
+.note .d { font-size: 12px; font-weight: 600; color: var(--muted); }
+.note p { margin: 3px 0 0; }
+
+/* Badges */
+.badge-hero { display: flex; gap: 16px; align-items: center; }
+.badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.badge-tile { border: 0; background: var(--card); border-radius: 18px; padding: 14px 6px 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; box-shadow: var(--shadow); min-width: 0; }
+.badge-tile .n { font-size: 13px; font-weight: 600; text-align: center; }
+.badge-tile .s { font-size: 11px; color: var(--muted); text-align: center; }
+.badge-tile.locked svg { opacity: .55; }
+
+/* Sheet + modal */
+.scrim { position: absolute; inset: 0; background: rgba(12,20,23,.38); z-index: 20; display: flex; align-items: flex-end; animation: fade .2s ease; }
+.scrim.center { align-items: center; justify-content: center; padding: 24px; }
+@keyframes fade { from { opacity: 0; } }
+.sheet { background: var(--surface); width: 100%; max-height: 92%; overflow-y: auto; border-radius: 26px 26px 0 0; padding: 10px 20px 28px; animation: slide .28s ease; }
+@keyframes slide { from { transform: translateY(40px); opacity: .4; } }
+.grabber { width: 40px; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto 10px; }
+.label { font-size: 13px; font-weight: 600; margin: 18px 0 8px; display: block; }
+.wrap-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg { display: flex; background: var(--line); border-radius: 12px; padding: 3px; gap: 3px; }
+.seg button { flex: 1; border: 0; background: none; border-radius: 9px; padding: 8px 4px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
+.seg-help { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.stack { display: flex; flex-direction: column; gap: 8px; }
+.error { color: var(--per); font-size: 13px; margin-top: 8px; }
+
+.modal { background: var(--surface); border-radius: 28px; padding: 30px 24px 22px; text-align: center; width: 100%; animation: rise .35s ease; }
+.modal .art { position: relative; width: 120px; height: 120px; margin: 0 auto 14px; display: grid; place-items: center; }
+.modal .art::before { content: ""; position: absolute; inset: -8px; border-radius: 50%; border: 2px solid var(--gold); opacity: 0; animation: halo 1.6s ease-out .2s 2; }
+@keyframes halo { 0% { opacity: .7; transform: scale(.8); } 100% { opacity: 0; transform: scale(1.35); } }
+.modal h3 { font-size: 22px; margin: 6px 0 6px; }
+.modal p { color: var(--muted); margin: 0 0 20px; }
+
+.toast { position: absolute; left: 20px; right: 20px; bottom: 112px; z-index: 30; background: var(--ink); color: var(--surface); border-radius: 14px; padding: 12px 16px; font-weight: 500; font-size: 14px; animation: rise .25s ease; }
+
+/* Toggle */
+.toggle { width: 50px; height: 30px; border-radius: 999px; border: 0; background: var(--line); position: relative; flex: none; transition: background .2s; padding: 0; }
+.toggle::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: transform .2s; }
+.toggle[aria-pressed="true"] { background: var(--accent); }
+.toggle[aria-pressed="true"]::after { transform: translateX(20px); }
+.setting { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.setting:last-child { border-bottom: 0; }
+.setting .t { flex: 1; min-width: 0; }
+.setting .t b { display: block; font-weight: 600; }
+.setting .t span { font-size: 13px; color: var(--muted); }
+input[type="time"].field { width: auto; padding: 8px 10px; }
+
+/* Side panel */
+.panel { width: 300px; max-width: 100%; padding-top: 24px; }
+.panel .brand { display: flex; align-items: center; gap: 10px; }
+.panel .brand .mark { width: 36px; height: 36px; border-radius: 10px; background: var(--accent); display: grid; place-items: center; }
+.panel .brand .mark svg { width: 22px; height: 22px; color: var(--accent-ink); }
+.panel .brand b { font-size: 20px; }
+.panel p { color: var(--muted); margin: 10px 0 0; max-width: 34ch; }
+.panel h4 { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 26px 0 8px; }
+.jump { display: flex; flex-direction: column; gap: 2px; }
+.jump button { border: 0; background: none; text-align: left; padding: 7px 10px; border-radius: 8px; font-weight: 500; }
+.jump button:hover { background: var(--card); }
+.jump button[aria-current="true"] { background: var(--card); color: var(--accent); font-weight: 600; }
+.panel ol { margin: 0; padding-left: 18px; color: var(--ink); display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+
+/* Assistant */
+.tabbar .ask-tab span { width: 46px; height: 46px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; margin-top: -20px; box-shadow: 0 6px 16px rgba(28,42,48,.18); }
+.tabbar .ask-tab svg { width: 22px; height: 22px; }
+.ask { height: 100%; display: flex; flex-direction: column; }
+.ask-head { display: flex; align-items: center; justify-content: space-between; padding: 6px 16px 4px; flex: none; }
+.voicebar { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--muted); padding: 4px 16px 10px; border-bottom: 1px solid var(--line); flex: none; }
+.voicebar svg { width: 16px; height: 16px; flex: none; }
+.voicebar.on { color: var(--accent); }
+.msgs { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: none; }
+.msg { max-width: 88%; padding: 10px 14px; border-radius: 18px; min-width: 0; overflow-wrap: anywhere; }
+.msg p { margin: 0 0 6px; } .msg p:last-child { margin: 0; }
+.msg.me { align-self: flex-end; background: var(--accent); color: var(--accent-ink); border-bottom-right-radius: 6px; }
+.msg.ai { align-self: flex-start; background: var(--card); box-shadow: var(--shadow); border-bottom-left-radius: 6px; }
+.msg .kind { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
+.msg .insp { font-family: var(--font-quiet); font-size: 18px; line-height: 1.35; }
+.msg .src { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.msg-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.spoke { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--accent); font-weight: 600; margin-top: 8px; }
+.spoke svg { width: 14px; height: 14px; }
+.ask-empty { margin: auto 0; text-align: center; padding: 8px 4px; }
+.suggest { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
+.composer { border-top: 1px solid var(--line); background: var(--card); padding: 10px 12px 16px; flex: none; }
+.composer-row { display: flex; gap: 8px; align-items: center; margin: 0; }
+.composer .field { border-radius: 999px; padding: 11px 16px; background: var(--surface); min-width: 0; }
+.mic { width: 46px; height: 46px; border-radius: 50%; border: 0; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; flex: none; padding: 0; }
+.mic svg { width: 22px; height: 22px; }
+.send { border: 0; background: none; color: var(--accent); width: 36px; height: 36px; display: grid; place-items: center; flex: none; padding: 0; }
+.send svg { width: 20px; height: 20px; }
+.listening { display: flex; align-items: center; gap: 12px; justify-content: space-between; min-height: 46px; padding: 0 4px; font-weight: 600; color: var(--accent); }
+.wave { display: flex; gap: 3px; align-items: center; height: 24px; }
+.wave i { width: 4px; height: 8px; background: var(--accent); border-radius: 2px; animation: wv 1s ease-in-out infinite; }
+.wave i:nth-child(2) { animation-delay: .12s; } .wave i:nth-child(3) { animation-delay: .24s; } .wave i:nth-child(4) { animation-delay: .36s; } .wave i:nth-child(5) { animation-delay: .48s; }
+@keyframes wv { 50% { height: 22px; } }
+.sim { font-size: 11px; color: var(--muted); text-align: center; margin-top: 6px; }
+.toggle.sm { width: 40px; height: 24px; }
+.toggle.sm::after { width: 18px; height: 18px; }
+.toggle.sm[aria-pressed="true"]::after { transform: translateX(16px); }
+.med-actions { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; }
+.med-actions .btn { padding: 8px 12px; font-size: 14px; }
+.panel .ctl { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 10px; font-weight: 500; }
+
+@media (max-width: 760px) {
+  .stage { padding-block: 16px 40px; gap: 28px; }
+  .phone { width: 100%; height: min(820px, calc(100svh - 32px)); border-width: 0; border-radius: 28px; box-shadow: var(--shadow); }
+  .statusbar { display: none; }
+  .lock { padding-top: 28px; }
+  .tabbar { padding-bottom: 12px; }
+  .panel { width: 100%; padding-top: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="stage">
+  <div class="phone" id="phone">
+    <div class="statusbar"><span>7:30</span><span class="dots"><b></b><b></b><b></b><i></i></span></div>
+    <div class="screen" id="screen"></div>
+    <nav class="tabbar" id="tabbar" aria-label="Main"></nav>
+    <div id="overlay"></div>
+    <div id="toastHost"></div>
+  </div>
+
+  <aside class="panel" aria-label="About this prototype">
+    <div class="brand"><span class="mark" id="brandMark"></span><b>GetToIt</b></div>
+    <p style="font-family:var(--font-quiet);font-style:italic;font-size:17px;color:var(--ink)">Bring practice to your purpose.</p>
+    <p>Click-through prototype, round two. The goals are made-up examples, and nothing is saved yet.</p>
+    <h4>Try this</h4>
+    <ol>
+      <li>Tap the morning notification.</li>
+      <li>On Today, check off "Draft the agenda." Two badges unlock.</li>
+      <li>Tap the swap arrows on a step, or "+ Add a step," to change today's list.</li>
+      <li>In Goals, finish a Personal milestone to earn Balanced.</li>
+      <li>Add a goal and create a new category.</li>
+      <li>On Today, swap "Finish module 3." It has already moved twice, so the nudge appears.</li>
+      <li>Tap Ask. Try the suggestions, or type "I studied for the AWS exam."</li>
+      <li>Turn on headphones below and ask again to hear a spoken reply.</li>
+    </ol>
+    <h4>Jump to a screen</h4>
+    <div class="jump" id="jump"></div>
+    <h4>Simulate</h4>
+    <div class="ctl"><span>Headphones connected</span><button class="toggle sm" id="hpToggle" aria-pressed="false" aria-label="Simulate headphones connected" data-act="headphones"></button></div>
+    <h4>Reset</h4>
+    <button class="btn ghost" data-act="restart" style="padding-left:10px">Start over</button>
+  </aside>
+</div>
+
+<script>
+const ICONS = {
+  cairn: '<svg viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="19" rx="7" ry="2.6"/><ellipse cx="12" cy="13.6" rx="5" ry="2.2"/><ellipse cx="12" cy="8.8" rx="3.4" ry="1.9"/><ellipse cx="12" cy="4.9" rx="2" ry="1.4"/></svg>',
+  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg>',
+  goals: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 5h11l-2.5 4L16 13H5"/></svg>',
+  award: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></svg>',
+  bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+  swap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 4 7l3 3"/><path d="M4 7h12a4 4 0 0 1 4 4"/><path d="m17 20 3-3-3-3"/><path d="M20 17H8a4 4 0 0 1-4-4"/></svg>',
+  mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/></svg>',
+  sliders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>',
+  headphones: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3.5" y="14" width="4" height="6" rx="1.5"/><rect x="16.5" y="14" width="4" height="6" rx="1.5"/></svg>',
+  speaker: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
+  mute: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="m16 10 4 4M20 10l-4 4"/></svg>',
+  send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  left: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>',
+};
+
+const GLYPHS = {
+  flag: c => `<path d="M25 45V19"/><path d="M25 20h14l-3.5 5.5L39 31H25"/>`,
+  sunrise: c => `<path d="M19 39h26"/><path d="M24 39a8 8 0 0 1 16 0"/><path d="M32 22v4M22.5 27.5l2.5 2.5M41.5 27.5 39 30"/>`,
+  wave: c => `<path d="M19 35c3.2-5 6.5-5 9.7 0s6.5 5 9.7 0 4.6-3.6 6.6-2"/><path d="M19 27c3.2-5 6.5-5 9.7 0s6.5 5 9.7 0 4.6-3.6 6.6-2" opacity=".5"/>`,
+  seedling: c => `<path d="M32 45V31"/><path d="M32 32c0-6-4-9.5-10-9.5 0 6 4 9.5 10 9.5z"/><path d="M32 35c0-5 4-8.5 9-8.5 0 5-4 8.5-9 8.5z"/>`,
+  half: c => `<circle cx="32" cy="32" r="11"/><path d="M32 21a11 11 0 0 1 0 22z" fill="${c}"/>`,
+  mountain: c => `<path d="M18 43 28 27l6 9 4-5 8 12z"/>`,
+  compass: c => `<circle cx="32" cy="32" r="12"/><path d="m37 27-3 7.5-7 2.5 3-7.5z"/>`,
+  pen: c => `<path d="m23 41 2-7 13-13 5 5-13 13z"/><path d="m35 24 5 5"/>`,
+  balance: c => `<circle cx="32" cy="23" r="4"/><circle cx="23" cy="39" r="4"/><circle cx="41" cy="39" r="4"/>`,
+  rhythm: c => `<circle cx="32" cy="32" r="3.5"/><circle cx="32" cy="32" r="9" opacity=".6"/><circle cx="32" cy="32" r="14.5" opacity=".3"/>`,
+};
+
+const STARTER_PHRASES = [
+  { line: "Small steps still move you forward.", sub: "You don't have to do everything today. Just the next thing." },
+  { line: "Progress counts, even when it's quiet.", sub: "Some days the win is simply showing up." },
+  { line: "Begin again as often as you need.", sub: "A missed day is a pause, not a verdict." },
+];
+const ENCOURAGE = ["Nicely done. One more step behind you.", "That's progress, and it counts.", "Good work. Momentum is building.", "One step closer."];
+const MAX_FOCUS = 5;
+const NEW_COLORS = ["var(--c4)", "var(--c5)", "var(--c6)"];
+const HORIZONS = { short: "Short term", mid: "Mid term", long: "Long term" };
+const HORIZON_HELP = { short: "Next 3 months", mid: "3 to 12 months", long: "A year or more" };
+
+function freshState() {
+  return {
+    screen: "lock", prev: "today", goalId: null, filter: "all", phraseIdx: 0, toastTimer: null,
+    days: [1, 1, 0, 1, 1, 0, 0],
+    weekCats: new Set(["pro", "phy"]),
+    activeDays: 18,
+    celebrate: [], lastEarned: "showing-up",
+    prefs: { time: "07:30", longNudge: true, recap: true, tone: "encouraging" },
+    phrases: STARTER_PHRASES.map(p => ({ ...p })).concat([{ line: "Done is better than perfect.", sub: "One you added on Nov 10.", mine: true }]),
+    swapCounts: { "g3:2": 2 },
+    headphones: false, voiceHeadphones: true, voiceAlways: false,
+    chat: [], listening: false, voiceSample: 0,
+    cats: [
+      { id: "pro", name: "Professional", color: "var(--pro)" },
+      { id: "per", name: "Personal", color: "var(--per)" },
+      { id: "phy", name: "Physical", color: "var(--phy)" },
+    ],
+    goals: [
+      { id: "g1", title: "Lead the Q1 client workshop", cat: "pro", horizon: "short", target: "Dec 12",
+        milestones: [ { t: "Agree on goals with the client", done: true, when: "Nov 18" }, { t: "Draft the agenda and send it over", when: "Due Wed" }, { t: "Build the slides and exercises", when: "Dec 5" }, { t: "Run the workshop", when: "Dec 12" } ],
+        notes: [ { d: "Nov 20", t: "Client wants it hands-on. Fewer slides, more exercises." }, { d: "Nov 18", t: "Kickoff call went well. I felt prepared." } ] },
+      { id: "g2", title: "Run a 10K", cat: "phy", horizon: "mid", target: "April 2027",
+        milestones: [ { t: "Run 1 mile without stopping", done: true, when: "Oct 28" }, { t: "Run 2 miles without stopping", done: true, when: "Nov 21" }, { t: "Run 3 miles without stopping", when: "This week" }, { t: "Sign up for a spring race" }, { t: "Run 5 miles" }, { t: "Race day", when: "April" } ],
+        notes: [ { d: "Nov 21", t: "Two miles felt easier than last week. Knees are fine." } ] },
+      { id: "g3", title: "Earn the AWS Solutions Architect cert", cat: "pro", horizon: "mid", target: "March 2027",
+        milestones: [ { t: "Finish module 1", done: true, when: "Oct 30" }, { t: "Finish module 2", done: true, when: "Nov 12" }, { t: "Finish module 3: networking", when: "Nov 30" }, { t: "Take a practice exam" }, { t: "Book the exam" }, { t: "Pass the exam" } ],
+        notes: [] },
+      { id: "g4", title: "Journal once a week", cat: "per", horizon: "short", target: "January 2027",
+        milestones: [ { t: "Write the first entry", done: true, when: "Nov 1" }, { t: "Four weeks in a row", when: "Nov 29" }, { t: "Eight entries" }, { t: "Twelve entries" } ],
+        notes: [ { d: "Nov 16", t: "Sunday night works best for writing." } ] },
+      { id: "g5", title: "Plan a family trip to Portugal", cat: "per", horizon: "mid", target: "Summer 2027",
+        milestones: [ { t: "Pick dates with everyone" }, { t: "Set a budget" }, { t: "Book flights" }, { t: "Book places to stay" } ],
+        notes: [] },
+      { id: "g6", title: "Move into a director role", cat: "pro", horizon: "long", target: "2028",
+        milestones: [ { t: "Write down what the role looks like to me", done: true, when: "Nov 2" }, { t: "Have a career chat with my manager" }, { t: "Lead one cross-team project" }, { t: "Find a director-level mentor" } ],
+        notes: [ { d: "Nov 2", t: "Wrote a one-page picture of the role. Clearer than I expected." } ] },
+    ],
+    focus: [["g1", 1], ["g2", 2], ["g3", 2]],
+    nudge: ["g6", 1],
+    badges: [
+      { id: "first-step", name: "First Step", glyph: "flag", how: "Complete your first milestone.", count: 1, earned: "Oct 28" },
+      { id: "showing-up", name: "Showing Up", glyph: "sunrise", how: "Make progress on 3 days in a week.", count: 4, earned: "Nov 15" },
+      { id: "steady", name: "Steady", glyph: "wave", how: "Make progress on 5 days in a week. Any 5, not 5 in a row.", count: 0 },
+      { id: "fresh-start", name: "Fresh Start", glyph: "seedling", how: "Come back after a few days away. Returning is a skill.", count: 1, earned: "Nov 9" },
+      { id: "halfway", name: "Halfway", glyph: "half", how: "Reach the midpoint of any goal.", count: 0 },
+      { id: "summit", name: "Summit", glyph: "mountain", how: "Complete a goal.", count: 0 },
+      { id: "long-game", name: "Long Game", glyph: "compass", how: "Reach a milestone on a long-term goal.", count: 1, earned: "Nov 2" },
+      { id: "reflective", name: "Reflective", glyph: "pen", how: "Write 10 notes or updates on your goals.", count: 0 },
+      { id: "balanced", name: "Balanced", glyph: "balance", how: "Make progress in three categories in one week.", count: 0 },
+    ],
+  };
+}
+let S = freshState();
+
+const $ = sel => document.querySelector(sel);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const goal = id => S.goals.find(g => g.id === id);
+const cat = id => S.cats.find(c => c.id === id) || S.cats[0];
+const badge = id => S.badges.find(b => b.id === id);
+const doneCount = g => g.milestones.filter(m => m.done).length;
+const progress = g => g.milestones.length ? doneCount(g) / g.milestones.length : 0;
+const activeThisWeek = () => S.days.reduce((a, b) => a + b, 0);
+const notesTotal = () => S.goals.reduce((a, g) => a + g.notes.length, 0);
+const nextMs = g => g.milestones.find(m => !m.done);
+
+function badgeArt(b, size = 64) {
+  const earned = b.count > 0;
+  const ring = earned ? "var(--gold)" : "var(--line)";
+  const fill = earned ? "var(--gold-soft)" : "var(--surface)";
+  const glyph = earned ? "var(--gold)" : "var(--muted)";
+  return `<svg viewBox="0 0 64 64" width="${size}" height="${size}" aria-hidden="true">
+    <circle cx="32" cy="32" r="29" fill="${fill}" stroke="${ring}" stroke-width="2.5"/>
+    <circle cx="32" cy="32" r="23.5" fill="none" stroke="${ring}" stroke-width="1" stroke-dasharray="1.5 3" opacity=".8"/>
+    <g fill="none" stroke="${glyph}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${GLYPHS[b.glyph](glyph)}</g>
+  </svg>`;
+}
+
+function badgeProgress(b) {
+  if (b.count > 0) return b.count > 1 ? `Earned ${b.count} times` : `Earned ${b.earned}`;
+  switch (b.id) {
+    case "steady": return `${activeThisWeek()} of 5 days this week`;
+    case "halfway": {
+      const g = [...S.goals].filter(g => progress(g) < .5).sort((a, b) => progress(b) - progress(a))[0];
+      return g ? `Closest: ${g.title}` : "Keep going";
+    }
+    case "summit": {
+      const g = [...S.goals].sort((a, b) => progress(b) - progress(a))[0];
+      return `Closest: ${g.title}`;
+    }
+    case "reflective": return `${notesTotal()} of 10 notes`;
+    case "balanced": return `${S.weekCats.size} of 3 categories this week`;
+  }
+  return "";
+}
+
+/* ---------- Screens ---------- */
+function lockScreen() {
+  const n = S.focus.length;
+  return `<div class="lock">
+    <div class="date">Monday, November 23</div>
+    <div class="time">7:30</div>
+    <button class="notif" data-act="go:meditate">
+      <span class="appicon">${ICONS.cairn}</span>
+      <span><span class="spread"><b>GetToIt</b><span class="small muted">now</span></span>
+      <p>Good morning. Today's thought is ready, plus ${n} small steps across your goals.</p></span>
+    </button>
+    <div class="hint">One gentle digest each morning. That's it.</div>
+  </div>`;
+}
+
+const curPhrase = () => S.phrases[S.phraseIdx % S.phrases.length];
+
+function meditateScreen() {
+  const p = curPhrase();
+  return `<div class="meditate">
+    <div class="eyebrow">${p.mine ? "Your words" : "Today's thought"}</div>
+    <div class="breath" aria-hidden="true"><span>Breathe</span></div>
+    <p class="phrase">${esc(p.line)}</p>
+    <p class="sub">${esc(p.sub)}</p>
+    <div class="med-actions">
+      <button class="btn ghost" data-act="fav">${p.fav ? "Saved to favorites" : "Save this one"}</button>
+      <button class="btn ghost" data-act="addthought">Add your own</button>
+    </div>
+    <p class="small muted" style="margin:0">Take three slow breaths before you start.</p>
+    <button class="btn block" data-act="go:today">Start my day</button>
+  </div>`;
+}
+
+function todayScreen() {
+  const p = curPhrase();
+  const active = activeThisWeek();
+  const labels = ["T", "W", "T", "F", "S", "S", "M"];
+  const week = S.days.map((d, i) => `<div><i class="${d ? "on" : ""} ${i === 6 ? "today" : ""}"></i>${labels[i]}</div>`).join("");
+  const doneToday = S.focus.filter(([gid, i]) => goal(gid).milestones[i].done).length;
+  const focus = S.focus.map(([gid, i, mine], idx) => {
+    const g = goal(gid), m = g.milestones[i], c = cat(g.cat);
+    return `<div class="focus-item ${m.done ? "done" : ""}">
+      <button class="check" role="checkbox" aria-checked="${!!m.done}" aria-label="Mark done: ${esc(m.t)}" data-act="toggle:${gid}:${i}">${ICONS.check}</button>
+      <button class="linkish body" data-act="goal:${gid}">
+        <div class="what">${esc(m.t)}</div>
+        <div class="meta"><span class="dot" style="background:${c.color}"></span>${esc(g.title)}${m.when && !m.done ? ` · ${esc(m.when)}` : ""}${mine ? " · Your pick" : ""}</div>
+      </button>
+      ${m.done ? "" : `<button class="swap" aria-label="Swap for a different step" data-act="swap:${idx}">${ICONS.swap}</button>`}
+    </div>`;
+  }).join("");
+  const [ngid, ni] = S.nudge; const ng = goal(ngid); const nm = ng.milestones[ni];
+  const weekMsg = active >= 5 ? "A steady week. Well done." : active >= 3 ? "Good rhythm this week." : "Every step counts, whenever it happens.";
+
+  return `
+    <div class="spread" style="margin-top:6px">
+      <div><div class="eyebrow">Monday, November 23</div><h1>Good morning</h1></div>
+      <button class="iconbtn" aria-label="Settings" data-act="go:reminders">${ICONS.sliders}</button>
+    </div>
+
+    <button class="thought" data-act="go:meditate">
+      <span class="eyebrow" style="color:var(--accent)">${p.mine ? "Your words" : "Today's thought"}</span>
+      <span class="quiet">${esc(p.line)}</span>
+    </button>
+
+    <h2>Today's focus <span style="text-transform:none;letter-spacing:0;font-weight:600">· ${doneToday} of ${S.focus.length}</span></h2>
+    <div class="card focus">${focus}</div>
+    <div class="focus-foot">
+      <span class="small muted">${doneToday === S.focus.length ? "That's everything for today. Anything more is a bonus." : "Picked for you by what's due soonest."}</span>
+      ${S.focus.length < MAX_FOCUS ? `<button class="btn ghost" style="padding:8px 4px;white-space:nowrap" data-act="addfocus">+ Add a step</button>` : ""}
+    </div>
+
+    <h2>This week</h2>
+    <div class="card">
+      <div class="spread"><b>${active} of the last 7 days</b><span class="small muted">${weekMsg}</span></div>
+      <div class="week">${week}</div>
+      <p class="small muted" style="margin:12px 0 0">Missed days don't reset anything. Pick up wherever you are.</p>
+    </div>
+
+    <h2>When you're ready</h2>
+    <button class="card linkish" data-act="goal:${ngid}" style="display:block">
+      <span class="catlabel"><span class="dot" style="background:${cat(ng.cat).color}"></span>Long term · ${esc(ng.title)}</span>
+      <div style="font-weight:600;margin-top:6px">${esc(nm.done ? "You've taken this step. Nice." : nm.t)}</div>
+      <div class="small muted" style="margin-top:2px">No deadline. A small nudge so the big goal stays in view.</div>
+    </button>`;
+}
+
+function goalCard(g) {
+  const c = cat(g.cat), n = nextMs(g), d = doneCount(g);
+  return `<button class="card goal-card" data-act="goal:${g.id}">
+    <span class="catlabel"><span class="dot" style="background:${c.color}"></span>${esc(c.name)} · by ${esc(g.target)}</span>
+    <div class="title">${esc(g.title)}</div>
+    <div class="bar"><i style="width:${Math.round(progress(g) * 100)}%;background:${c.color}"></i></div>
+    <div class="foot">${d} of ${g.milestones.length} milestones${n ? ` · Next: ${esc(n.t)}` : " · Complete"}</div>
+  </button>`;
+}
+
+function goalsScreen() {
+  const chips = [`<button class="pill" aria-pressed="${S.filter === "all"}" data-act="filter:all">All</button>`]
+    .concat(S.cats.map(c => `<button class="pill" aria-pressed="${S.filter === c.id}" data-act="filter:${c.id}"><span class="dot" style="background:${c.color}"></span>${esc(c.name)}</button>`)).join("");
+  const list = S.goals.filter(g => S.filter === "all" || g.cat === S.filter);
+  const sections = Object.keys(HORIZONS).map(h => {
+    const gs = list.filter(g => g.horizon === h);
+    if (!gs.length) return "";
+    return `<h2>${HORIZONS[h]} <span style="text-transform:none;letter-spacing:0;font-weight:500">· ${HORIZON_HELP[h].toLowerCase()}</span></h2>${gs.map(goalCard).join("")}`;
+  }).join("");
+  return `
+    <div class="spread" style="margin-top:6px">
+      <h1>Goals</h1>
+      <button class="iconbtn" aria-label="New goal" data-act="add">${ICONS.plus}</button>
+    </div>
+    <div class="chips">${chips}</div>
+    ${sections || `<div class="card" style="margin-top:20px;text-align:center"><p style="margin:0 0 12px">No goals in this category yet.</p><button class="btn" data-act="add">Add a goal</button></div>`}`;
+}
+
+function goalScreen() {
+  const g = goal(S.goalId), c = cat(g.cat), d = doneCount(g);
+  const ms = g.milestones.map((m, i) => `<div class="ms ${m.done ? "done" : ""}">
+      <button class="check" role="checkbox" aria-checked="${!!m.done}" aria-label="Mark done: ${esc(m.t)}" data-act="toggle:${g.id}:${i}">${ICONS.check}</button>
+      <span class="t">${esc(m.t)}</span>${m.when ? `<span class="when">${m.done ? "Done " : ""}${esc(m.when)}</span>` : ""}
+    </div>`).join("");
+  const notes = g.notes.length
+    ? g.notes.map(n => `<div class="note"><div class="d">${esc(n.d)}</div><p>${esc(n.t)}</p></div>`).join("")
+    : `<p class="small muted" style="margin:4px 0 0">No updates yet. How is this going? A sentence is plenty.</p>`;
+  const pct = Math.round(progress(g) * 100);
+  const msg = pct === 100 ? "Complete. Take a moment to enjoy it." : pct >= 50 ? "Past the halfway mark." : d > 0 ? "Underway. Keep it light." : "Ready when you are.";
+  return `
+    <button class="back" data-act="back">${ICONS.left}Goals</button>
+    <div style="margin-top:6px"><span class="catlabel"><span class="dot" style="background:${c.color}"></span>${esc(c.name)} · ${HORIZONS[g.horizon]}</span></div>
+    <h1 style="margin-top:6px">${esc(g.title)}</h1>
+    <div class="card" style="margin-top:16px">
+      <div class="spread"><b>${d} of ${g.milestones.length} milestones</b><span class="small muted">By ${esc(g.target)}</span></div>
+      <div class="bar" style="margin-top:10px"><i style="width:${pct}%;background:${c.color}"></i></div>
+      <div class="small muted" style="margin-top:8px">${msg}</div>
+    </div>
+
+    <h2>Milestones</h2>
+    <div class="card" style="padding-block:4px">${ms}</div>
+    <div class="inline-add">
+      <input class="field" id="newMs" placeholder="Add a milestone" aria-label="New milestone">
+      <button class="iconbtn" aria-label="Add milestone" data-act="addms">${ICONS.plus}</button>
+    </div>
+
+    <h2>Notes & updates</h2>
+    <div class="card">
+      <textarea class="field" id="noteText" placeholder="What happened? What did you learn?" aria-label="New update"></textarea>
+      <div class="spread" style="margin-top:10px"><span class="small muted">Long notes are easier on the web app.</span><button class="btn" style="padding:10px 18px" data-act="addnote">Add update</button></div>
+    </div>
+    <div class="card" style="margin-top:10px;padding-block:4px">${notes}</div>`;
+}
+
+function badgesScreen() {
+  const earned = S.badges.filter(b => b.count > 0);
+  const total = S.badges.reduce((a, b) => a + b.count, 0);
+  const latest = badge(S.lastEarned);
+  const tiles = S.badges.map(b => `<button class="badge-tile ${b.count ? "" : "locked"}" data-act="badge:${b.id}">
+      ${badgeArt(b, 56)}<span class="n">${esc(b.name)}</span><span class="s">${b.count > 1 ? `×${b.count}` : b.count ? esc(b.earned) : "Not yet"}</span>
+    </button>`).join("");
+  return `
+    <h1 style="margin-top:6px">Badges</h1>
+    <div class="card badge-hero" style="margin-top:16px">
+      ${badgeArt(latest, 64)}
+      <div><b>${earned.length} of ${S.badges.length} badges</b><div class="small muted">${total} earned in all. Most recent: ${esc(latest.name)}.</div></div>
+    </div>
+    <h2>Collection</h2>
+    <div class="badge-grid">${tiles}</div>
+    <p class="small muted" style="margin:16px 2px 0">Badges reward showing up and coming back. None of them can be lost.</p>`;
+}
+
+function remindersScreen() {
+  const p = S.prefs;
+  return `
+    <button class="back" data-act="go:today">${ICONS.left}Today</button>
+    <h1 style="margin-top:6px">Settings</h1>
+
+    <h2>Reminders</h2>
+    <p class="small muted" style="margin:-4px 0 10px">One notification a day, with everything in it. No nagging.</p>
+    <div class="card" style="padding-block:4px">
+      <div class="setting"><div class="t"><b>Morning digest</b><span>Today's thought and your next few steps</span></div>
+        <input type="time" class="field" id="digestTime" value="${p.time}" aria-label="Digest time"></div>
+      <div class="setting"><div class="t"><b>Long-term nudges</b><span>Include one step toward a big goal, no deadline</span></div>
+        <button class="toggle" aria-pressed="${p.longNudge}" aria-label="Long-term nudges" data-act="pref:longNudge"></button></div>
+      <div class="setting"><div class="t"><b>Sunday recap</b><span>What you moved forward this week</span></div>
+        <button class="toggle" aria-pressed="${p.recap}" aria-label="Sunday recap" data-act="pref:recap"></button></div>
+    </div>
+
+    <h2>Tone</h2>
+    <div class="seg">
+      <button aria-pressed="${p.tone === "encouraging"}" data-act="tone:encouraging">Encouraging</button>
+      <button aria-pressed="${p.tone === "plain"}" data-act="tone:plain">Plain</button>
+    </div>
+
+    <h2>Voice</h2>
+    <div class="card" style="padding-block:4px">
+      <div class="setting"><div class="t"><b>Speak replies with headphones</b><span>GetToIt talks back when headphones are connected</span></div>
+        <button class="toggle" aria-pressed="${S.voiceHeadphones}" aria-label="Speak replies with headphones" data-act="voice:voiceHeadphones"></button></div>
+      <div class="setting"><div class="t"><b>Speak replies without headphones</b><span>Off keeps replies silent, as text</span></div>
+        <button class="toggle" aria-pressed="${S.voiceAlways}" aria-label="Speak replies without headphones" data-act="voice:voiceAlways"></button></div>
+    </div>
+
+    <h2>Notification preview</h2>
+    <div class="card row" style="align-items:flex-start">
+      <span class="iconbtn" style="background:var(--accent);border:0;border-radius:10px;width:38px;height:38px;color:var(--accent-ink)">${ICONS.cairn}</span>
+      <div style="min-width:0"><b>GetToIt</b><p style="margin:2px 0 0">${p.tone === "encouraging"
+        ? "Good morning. Today's thought is ready, plus 3 small steps across your goals."
+        : "3 steps today: workshop agenda, 3-mile run, module 3."}</p></div>
+    </div>`;
+}
+
+/* ---------- Assistant ---------- */
+const SUGGEST = ["How am I doing on the 10K?", "Tell me a short story", "I ran 3 miles today", "Add a goal: read 12 books this year", "Swap my run for something else", "Show my badges"];
+const VOICE_SAMPLES = ["How am I doing on the workshop?", "Give me some Buddhist wisdom", "I finished module 3 today", "Save a thought: Slow is smooth, smooth is fast"];
+const INSPIRE = {
+  quote: [{ kind: "Quote", text: "The journey of a thousand miles begins with a single step.", src: "Lao Tzu, Tao Te Ching" }],
+  buddhist: [{ kind: "Buddhist wisdom", text: "Drop by drop is the water pot filled. Likewise, the wise one, gathering it little by little, fills themselves with good.", src: "Adapted from the Dhammapada, verse 122" }],
+  idiom: [
+    { kind: "Idiom", text: "Fall down seven times, get up eight.", src: "Japanese proverb, nana korobi ya oki" },
+    { kind: "Idiom", text: "Little by little, one goes far.", src: "Spanish proverb, poco a poco se va lejos" },
+  ],
+  story: [{ kind: "Short story", text: "A farmer's horse ran away. \"Such bad luck,\" said the neighbors. \"Maybe,\" said the farmer. The horse came back leading three wild horses. \"Such good luck!\" \"Maybe.\" His son broke a leg taming one, and so was spared when the army came for young men. A setback today is only part of the story.", src: "Retold from the Chinese parable of Sai Weng's horse" }],
+};
+const GOAL_WORDS = { g1: ["workshop", "client", "agenda"], g2: ["10k", "run", "ran", "running", "mile", "miles"], g3: ["aws", "cert", "certification", "module", "exam"], g4: ["journal", "journaling", "entry"], g5: ["portugal", "trip", "vacation", "travel"], g6: ["director", "career", "promotion"] };
+const willSpeak = () => (S.headphones && S.voiceHeadphones) || S.voiceAlways;
+
+function matchGoal(q) {
+  for (const g of S.goals) {
+    const words = GOAL_WORDS[g.id] || g.title.toLowerCase().split(/\W+/).filter(w => w.length > 3);
+    if (words.some(w => new RegExp("\\b" + w + "\\b").test(q))) return g;
+  }
+  return null;
+}
+
+function goalSummary(g) {
+  const d = doneCount(g), n = g.milestones.length, next = nextMs(g), last = g.notes[0];
+  const pct = progress(g);
+  const tone = pct === 1 ? "It's complete." : pct >= .5 ? "You're past the halfway mark." : d ? "It's moving." : "It hasn't started yet, and that's fine.";
+  return {
+    html: `<p><b>${esc(g.title)}</b>: ${d} of ${n} milestones done. ${tone}</p>${next ? `<p>Next up: ${esc(next.t)}${next.when ? ` (${esc(next.when)})` : ""}.</p>` : ""}${last ? `<p class="src">Your last note, ${esc(last.d)}: "${esc(last.t)}"</p>` : ""}`,
+    say: `${g.title}: ${d} of ${n} milestones done. ${tone} ${next ? "Next up: " + next.t + "." : ""}`,
+    actions: [{ label: "Open goal", act: `goal:${g.id}` }],
+  };
+}
+
+function respond(text) {
+  const q = text.toLowerCase().trim();
+  let m;
+  if ((m = text.match(/^(?:add|save)(?: a| my)? (?:thought|phrase|mantra|quote)\s*[:,-]?\s*(.+)/i))) {
+    addPhrase(m[1].trim());
+    return { html: `<p>Saved to your thoughts:</p><p class="insp">${esc(m[1].trim())}</p><p class="src">It'll come back around on future mornings.</p>`, say: "Saved. It'll come back around on future mornings." };
+  }
+  if ((m = text.match(/(?:add|create|start|set)(?: a| new| another)? goal\s*[:,-]?\s*(?:to\s+)?(.+)/i))) {
+    let title = m[1].trim().replace(/[.!]+$/, "");
+    title = title.charAt(0).toUpperCase() + title.slice(1);
+    const c = /\b(run|gym|walk|weight|swim|bike|yoga|sleep|health|fit|lift|stretch)/i.test(title) ? "phy" : /\b(work|client|cert|career|job|team|business|course|promotion)/i.test(title) ? "pro" : "per";
+    const h = /\b(someday|career|lifetime|five years|5 years)/i.test(title) ? "long" : /\b(year|months)\b/i.test(title) ? "mid" : "short";
+    const g = { id: "g" + Date.now(), title, cat: c, horizon: h, target: h === "mid" ? "end of 2027" : h === "long" ? "no set date" : "February 2027", milestones: [{ t: "Decide on a first small step" }], notes: [] };
+    S.goals.push(g);
+    return { html: `<p>Added <b>${esc(title)}</b> to ${esc(cat(c).name)} as a ${HORIZONS[h].toLowerCase()} goal.</p><p>I gave it one starter milestone. Want to shape the rest?</p>`, say: `Added ${title} to ${cat(c).name}. Want to shape the milestones?`, actions: [{ label: "Open goal", act: `goal:${g.id}` }, { label: "Undo", act: `undo:${g.id}` }] };
+  }
+  if (/inspir|quote|story|idiom|proverb|buddh|wisdom|motivat|encourag|uplift|pick me up/.test(q)) {
+    const kind = /story|parable/.test(q) ? "story" : /idiom|proverb|saying/.test(q) ? "idiom" : /buddh|wisdom|zen/.test(q) ? "buddhist" : /quote/.test(q) ? "quote" : ["quote", "buddhist", "idiom", "story"][Math.floor(Math.random() * 4)];
+    const list = INSPIRE[kind], it = list[Math.floor(Math.random() * list.length)];
+    return { html: `<div class="kind">${esc(it.kind)}</div><p class="insp">${esc(it.text)}</p><p class="src">${esc(it.src)}</p>`, say: it.text, actions: [{ label: "Save to my thoughts", act: `savequote:${kind}:${list.indexOf(it)}` }, { label: "Another", act: "askmore" }] };
+  }
+  const g = matchGoal(q);
+  if (/\b(swap|switch|replace)\b/.test(q)) {
+    let idx = g ? S.focus.findIndex(([gid, i]) => gid === g.id && !goal(gid).milestones[i].done) : -1;
+    if (idx < 0) idx = S.focus.findIndex(([gid, i]) => !goal(gid).milestones[i].done);
+    if (idx < 0) return { html: "<p>Everything on today's list is already done. Nice.</p>", say: "Everything on today's list is already done. Nice." };
+    const step = goal(S.focus[idx][0]).milestones[S.focus[idx][1]].t;
+    return { html: `<p>Here's what you could do instead of "${esc(step)}".</p>`, say: "Here's what you could do instead.", after: () => { go("today"); openPicker("swap", idx); } };
+  }
+  if (/\b(open|show|go to|take me|view)\b/.test(q)) {
+    if (g) return { html: `<p>Opening ${esc(g.title)}.</p>`, say: "Opening it.", after: () => { S.goalId = g.id; go("goal"); } };
+    const dest = /badge|award|achiev/.test(q) ? ["badges", "your badges"] : /setting|reminder|notification|voice/.test(q) ? ["reminders", "settings"] : /goal/.test(q) ? ["goals", "your goals"] : /today|focus/.test(q) ? ["today", "today"] : /thought|meditat/.test(q) ? ["meditate", "today's thought"] : null;
+    if (dest) return { html: `<p>Opening ${dest[1]}.</p>`, say: `Opening ${dest[1]}.`, after: () => go(dest[0]) };
+  }
+  if (g && !/^(how|what|where|when)\b/.test(q) && /\b(ran|did|finished|finish|completed|done|update|log|wrote|studied|talked|booked|picked|sent|drafted|walked|read|practiced)\b/.test(q)) {
+    g.notes.unshift({ d: "Today", t: text.trim() });
+    const i = g.milestones.findIndex(x => !x.done);
+    const actions = i >= 0 ? [{ label: `Mark "${g.milestones[i].t}" done`, act: `aimark:${g.id}:${i}` }, { label: "Open goal", act: `goal:${g.id}` }] : [{ label: "Open goal", act: `goal:${g.id}` }];
+    return { html: `<p>Nice. I added that as an update on <b>${esc(g.title)}</b>.</p>${i >= 0 ? `<p>Does it finish your next milestone?</p>` : ""}`, say: `Nice. I added that as an update on ${g.title}.${i >= 0 ? " Does it finish your next milestone?" : ""}`, actions };
+  }
+  if (g) return goalSummary(g);
+  if (/how am i|progress|doing|status|this week|summary/.test(q)) {
+    const done = S.focus.filter(([gid, i]) => goal(gid).milestones[i].done).length;
+    const best = [...S.goals].filter(x => progress(x) < 1).sort((a, b) => progress(b) - progress(a))[0];
+    return { html: `<p>You've made progress on ${activeThisWeek()} of the last 7 days. Today: ${done} of ${S.focus.length} steps done.</p><p>Closest to finished: <b>${esc(best.title)}</b>, ${doneCount(best)} of ${best.milestones.length}.</p>`, say: `You've made progress on ${activeThisWeek()} of the last 7 days. Closest to finished is ${best.title}.`, actions: [{ label: "Open goals", act: "go:goals" }] };
+  }
+  return { html: `<p>I can check on a goal, log an update, add a new goal, swap today's steps, or find you a quote, story, idiom or bit of Buddhist wisdom.</p><p class="src">Try "How's my AWS cert going?" or "I ran 3 miles today."</p>`, say: "I can check on a goal, log an update, add a goal, swap a step, or find you some inspiration." };
+}
+
+function speak(t) {
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.rate = 0.98; speechSynthesis.speak(u); } catch (e) {}
+}
+
+function sendAsk(text) {
+  if (!text.trim()) return;
+  S.chat.push({ role: "me", html: `<p>${esc(text)}</p>` });
+  const r = respond(text);
+  const spoken = willSpeak();
+  S.chat.push({ role: "ai", html: r.html, actions: r.actions, spoken });
+  if (spoken) speak(r.say || "");
+  render();
+  if (r.after) setTimeout(r.after, 1100);
+}
+
+function assistantScreen() {
+  const on = willSpeak();
+  const label = S.headphones ? (S.voiceHeadphones ? "Headphones connected · replies spoken" : "Headphones connected · replies in text") : (S.voiceAlways ? "Replies spoken aloud" : "No headphones · replies in text");
+  const icon = S.headphones ? ICONS.headphones : on ? ICONS.speaker : ICONS.mute;
+  const msgs = S.chat.length ? S.chat.map(m => `<div class="msg ${m.role}">${m.html}${m.actions && m.actions.length ? `<div class="msg-actions">${m.actions.map(a => `<button class="pill" data-act="${a.act}">${esc(a.label)}</button>`).join("")}</div>` : ""}${m.spoken ? `<div class="spoke">${ICONS.speaker}Spoken</div>` : ""}</div>`).join("")
+    : `<div class="ask-empty"><div class="quiet" style="font-size:25px">What's on your mind?</div><p class="small muted" style="margin:8px auto 0;max-width:30ch">Ask about a goal, log an update, add something new, or ask for a little inspiration.</p>
+       <div class="suggest">${SUGGEST.map(x => `<button class="pill" data-act="askchip" data-q="${esc(x)}">${esc(x)}</button>`).join("")}</div></div>`;
+  const composer = S.listening
+    ? `<div class="listening"><span class="row" style="gap:10px"><span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>Listening…</span><button class="btn ghost" data-act="stoplisten">Cancel</button></div>`
+    : `<form class="composer-row" id="askForm"><input class="field" id="askInput" placeholder="Ask or tell GetToIt anything" autocomplete="off" aria-label="Message">
+       <button type="submit" class="send" aria-label="Send">${ICONS.send}</button>
+       <button type="button" class="mic" aria-label="Speak" data-act="listen">${ICONS.mic}</button></form>`;
+  return `<div class="ask">
+    <div class="ask-head">
+      <button class="iconbtn" aria-label="Close" data-act="go:${S.prev}">${ICONS.close}</button>
+      <b style="font-size:16px">Ask GetToIt</b>
+      <span style="width:40px"></span>
+    </div>
+    <div class="voicebar ${on ? "on" : ""}">${icon}<span>${label}</span>${S.headphones ? "" : `<button class="toggle sm" aria-pressed="${S.voiceAlways}" aria-label="Speak replies without headphones" data-act="voice:voiceAlways"></button>`}</div>
+    <div class="msgs" id="msgs">${msgs}</div>
+    <div class="composer">${composer}<div class="sim">Voice input is simulated in this prototype.</div></div>
+  </div>`;
+}
+
+function addPhrase(line, sub) {
+  S.phrases.push({ line, sub: sub || "One you added.", mine: true });
+  return S.phrases.length - 1;
+}
+
+function openThoughtSheet() {
+  $("#overlay").innerHTML = `<div class="scrim" data-act="closesheet">
+    <div class="sheet" role="dialog" aria-label="Add your own thought" data-stop>
+      <div class="grabber"></div>
+      <div class="spread"><b style="font-size:18px">Add your own thought</b><button class="btn ghost" data-act="closesheet">Cancel</button></div>
+      <p class="small muted" style="margin:4px 0 0">A line that steadies you. It joins the rotation with the rest.</p>
+      <label class="label" for="thoughtLine">Your thought</label>
+      <textarea class="field" id="thoughtLine" placeholder="e.g. Slow is smooth, smooth is fast."></textarea>
+      <label class="label" for="thoughtSub">A note to go with it <span class="muted" style="font-weight:400">(optional)</span></label>
+      <input class="field" id="thoughtSub" placeholder="e.g. From my first coach">
+      <button class="btn block" style="margin-top:18px" data-act="savethought">Save thought</button>
+    </div>
+  </div>`;
+  setTimeout(() => $("#thoughtLine")?.focus(), 50);
+}
+
+function openNudge(gid, i) {
+  const m = goal(gid).milestones[i];
+  $("#overlay").innerHTML = `<div class="scrim" data-act="closesheet">
+    <div class="sheet" role="dialog" aria-label="Break this step down" data-stop>
+      <div class="grabber"></div>
+      <b style="font-size:18px">This step keeps moving</b>
+      <p class="muted" style="margin:8px 0 0">"${esc(m.t)}" has been swapped out three days running. That usually means the step is too big, not that you're falling short.</p>
+      <p style="margin:12px 0 0;font-weight:600">Want to break it into smaller pieces?</p>
+      <div class="stack" style="margin-top:12px">
+        <input class="field" id="bd1" placeholder="e.g. Watch the first two lessons" aria-label="Smaller step 1">
+        <input class="field" id="bd2" placeholder="e.g. Do the lab exercise" aria-label="Smaller step 2">
+        <input class="field" id="bd3" placeholder="e.g. Take the module quiz" aria-label="Smaller step 3">
+      </div>
+      <button class="btn block" style="margin-top:16px" data-act="breakdown:${gid}:${i}">Break it down</button>
+      <button class="btn ghost block" style="margin-top:4px" data-act="keepstep:${gid}:${i}">Keep it as is</button>
+    </div>
+  </div>`;
+}
+
+/* ---------- Overlays ---------- */
+function openAddSheet() {
+  const catChips = S.cats.map((c, i) => `<button class="pill" aria-pressed="${i === 0}" data-act="pickcat:${c.id}" data-cat="${c.id}"><span class="dot" style="background:${c.color}"></span>${esc(c.name)}</button>`).join("");
+  $("#overlay").innerHTML = `<div class="scrim" data-act="closesheet">
+    <div class="sheet" role="dialog" aria-label="New goal" data-stop>
+      <div class="grabber"></div>
+      <div class="spread"><b style="font-size:18px">New goal</b><button class="btn ghost" data-act="closesheet">Cancel</button></div>
+      <label class="label" for="gTitle">What do you want to achieve?</label>
+      <input class="field" id="gTitle" placeholder="e.g. Read 12 books this year">
+      <div class="error" id="gErr" hidden>Give your goal a name to save it.</div>
+
+      <span class="label">Category</span>
+      <div class="wrap-chips" id="catChips">${catChips}<button class="pill" data-act="newcat" id="newCatBtn">${ICONS.plus.replace('<svg', '<svg width="14" height="14"')}New</button></div>
+      <div class="inline-add" id="newCatRow" hidden>
+        <input class="field" id="newCatName" placeholder="Category name, e.g. Financial" aria-label="New category name">
+        <button class="btn" style="padding:10px 16px" data-act="savecat">Add</button>
+      </div>
+
+      <span class="label">Time frame</span>
+      <div class="seg" id="hzSeg">
+        <button aria-pressed="true" data-act="pickhz:short" data-hz="short">Short</button>
+        <button aria-pressed="false" data-act="pickhz:mid" data-hz="mid">Mid</button>
+        <button aria-pressed="false" data-act="pickhz:long" data-hz="long">Long</button>
+      </div>
+      <div class="seg-help" id="hzHelp">${HORIZON_HELP.short}</div>
+
+      <label class="label" for="gTarget">Target date <span class="muted" style="font-weight:400">(optional)</span></label>
+      <input class="field" id="gTarget" placeholder="e.g. March 2027">
+
+      <span class="label">First milestones</span>
+      <div class="stack">
+        <input class="field" id="gm1" placeholder="Milestone 1" aria-label="Milestone 1">
+        <input class="field" id="gm2" placeholder="Milestone 2" aria-label="Milestone 2">
+        <input class="field" id="gm3" placeholder="Milestone 3" aria-label="Milestone 3">
+      </div>
+      <p class="small muted" style="margin:8px 0 18px">Start small. You can add or change milestones any time.</p>
+      <button class="btn block" data-act="savegoal">Save goal</button>
+    </div>
+  </div>`;
+  setTimeout(() => $("#gTitle")?.focus(), 50);
+}
+
+function focusCandidates() {
+  const taken = new Set(S.focus.map(([g, i]) => g + ":" + i));
+  return S.goals.map(g => {
+    const i = g.milestones.findIndex(m => !m.done);
+    return i < 0 || taken.has(g.id + ":" + i) ? null : [g, i];
+  }).filter(Boolean);
+}
+
+function openPicker(mode, idx) {
+  S.pick = { mode, idx };
+  const list = focusCandidates();
+  const current = mode === "swap" ? goal(S.focus[idx][0]).milestones[S.focus[idx][1]].t : "";
+  const rows = list.length ? list.map(([g, i]) => {
+    const m = g.milestones[i], c = cat(g.cat);
+    return `<button class="pick" data-act="pickfocus:${g.id}:${i}">
+      <span class="dot" style="background:${c.color}"></span>
+      <span class="body"><b style="font-weight:600">${esc(m.t)}</b>
+      <span class="small muted" style="display:block">${esc(g.title)}${m.when ? ` · ${esc(m.when)}` : ""}</span></span>
+    </button>`;
+  }).join("") : `<p class="muted">Every goal's next step is already on today's list.</p>`;
+  $("#overlay").innerHTML = `<div class="scrim" data-act="closesheet">
+    <div class="sheet" role="dialog" aria-label="${mode === "swap" ? "Swap a step" : "Add a step"}" data-stop>
+      <div class="grabber"></div>
+      <div class="spread"><b style="font-size:18px">${mode === "swap" ? "Swap this step" : "Add a step to today"}</b><button class="btn ghost" data-act="closesheet">Cancel</button></div>
+      <p class="small muted" style="margin:4px 0 16px">${mode === "swap"
+        ? `Replacing "${esc(current)}". It stays on its goal for another day.`
+        : `Choose the next step from any goal. Today's list holds up to ${MAX_FOCUS}.`}</p>
+      <div class="stack">${rows}</div>
+    </div>
+  </div>`;
+}
+
+function showCelebration() {
+  const id = S.celebrate[0];
+  if (!id) { $("#overlay").innerHTML = ""; return; }
+  const b = badge(id);
+  const more = S.celebrate.length > 1;
+  $("#overlay").innerHTML = `<div class="scrim center">
+    <div class="modal" role="dialog" aria-label="Badge earned">
+      <div class="art">${badgeArt(b, 120)}</div>
+      <div class="eyebrow" style="color:var(--gold)">Badge earned</div>
+      <h3>${esc(b.name)}</h3>
+      <p>${esc(b.how)}</p>
+      <button class="btn block" data-act="nextcele">${more ? "Next" : "Keep going"}</button>
+    </div>
+  </div>`;
+}
+
+function showBadge(id) {
+  const b = badge(id);
+  $("#overlay").innerHTML = `<div class="scrim center" data-act="closesheet">
+    <div class="modal" data-stop>
+      <div class="art">${badgeArt(b, 110)}</div>
+      <h3>${esc(b.name)}</h3>
+      <p>${esc(b.how)}<br><span style="color:var(--ink);font-weight:600">${esc(badgeProgress(b))}</span></p>
+      <button class="btn block" data-act="closesheet">Close</button>
+    </div>
+  </div>`;
+}
+
+function toast(msg) {
+  clearTimeout(S.toastTimer);
+  $("#toastHost").innerHTML = `<div class="toast" role="status">${esc(msg)}</div>`;
+  S.toastTimer = setTimeout(() => { $("#toastHost").innerHTML = ""; }, 2600);
+}
+
+/* ---------- Logic ---------- */
+function earn(id) {
+  const b = badge(id);
+  b.count += 1; b.earned = "Today"; S.lastEarned = id;
+  if (!S.celebrate.includes(id)) S.celebrate.push(id);
+}
+
+function toggleMilestone(gid, i) {
+  const g = goal(gid), m = g.milestones[i];
+  if (m.done) { m.done = false; m.when = m.prevWhen; render(); return; }
+  const before = progress(g);
+  m.prevWhen = m.when; m.done = true; m.when = "Today";
+  if (!S.days[6]) {
+    S.days[6] = 1; S.activeDays += 1;
+    if (activeThisWeek() >= 5 && !badge("steady").count) earn("steady");
+  }
+  S.weekCats.add(g.cat);
+  if (S.weekCats.size >= 3 && !badge("balanced").count) earn("balanced");
+  const after = progress(g);
+  if (before < .5 && after >= .5 && after < 1) earn("halfway");
+  if (after === 1) earn("summit");
+  if (g.horizon === "long") earn("long-game");
+  render();
+  const el = document.querySelector(`[data-act="toggle:${gid}:${i}"]`);
+  el?.classList.add("pop");
+  if (S.celebrate.length) setTimeout(showCelebration, 380);
+  else toast(ENCOURAGE[Math.floor(Math.random() * ENCOURAGE.length)]);
+}
+
+function go(screen) {
+  if (["today", "goals", "badges"].includes(screen)) S.prev = screen;
+  S.screen = screen;
+  $("#overlay").innerHTML = "";
+  render(true);
+}
+
+const SCREENS = { lock: lockScreen, meditate: meditateScreen, today: todayScreen, goals: goalsScreen, goal: goalScreen, badges: badgesScreen, reminders: remindersScreen, assistant: assistantScreen };
+const TABS = [["today", "Today", ICONS.sun], ["goals", "Goals", ICONS.goals], ["assistant", "Ask", ICONS.mic], ["badges", "Badges", ICONS.award]];
+const JUMPS = [["lock", "Morning notification"], ["meditate", "Today's thought"], ["today", "Today"], ["swap", "Swap a step"], ["goals", "Goals"], ["goal", "Goal detail"], ["add", "New goal"], ["badges", "Badges"], ["assistant", "Ask GetToIt"], ["reminders", "Settings"]];
+
+function render(resetScroll) {
+  const scr = $("#screen");
+  const keep = resetScroll ? 0 : scr.scrollTop;
+  scr.className = "screen" + (["lock", "meditate", "assistant"].includes(S.screen) ? " full" : "");
+  scr.innerHTML = SCREENS[S.screen]();
+  scr.scrollTop = keep;
+  const showTabs = !["lock", "meditate", "assistant"].includes(S.screen);
+  const tabbar = $("#tabbar");
+  tabbar.hidden = !showTabs;
+  const activeTab = S.screen === "goal" ? "goals" : S.screen === "reminders" ? "today" : S.screen;
+  tabbar.innerHTML = TABS.map(([id, label, icon]) => id === "assistant"
+    ? `<button class="ask-tab" data-act="go:assistant" aria-label="Ask GetToIt"><span>${icon}</span>${label}</button>`
+    : `<button data-act="go:${id}" ${activeTab === id ? 'aria-current="page"' : ""}>${icon}${label}</button>`).join("");
+  const msgs = $("#msgs"); if (msgs) msgs.scrollTop = msgs.scrollHeight;
+  const hp = $("#hpToggle"); if (hp) hp.setAttribute("aria-pressed", S.headphones);
+  $("#jump").innerHTML = JUMPS.map(([id, label]) => `<button data-act="jump:${id}" aria-current="${S.screen === id}">${label}</button>`).join("");
+}
+
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]");
+  if (!el) return;
+  if (el.dataset.act === "closesheet" && e.target.closest("[data-stop]") && !e.target.closest('button[data-act="closesheet"]')) return;
+  const [act, a, b] = el.dataset.act.split(":");
+  switch (act) {
+    case "go": go(a); break;
+    case "jump":
+      if (a === "goal") { S.goalId = S.goalId || "g1"; go("goal"); }
+      else if (a === "swap") { go("today"); const k = S.focus.findIndex(([g, i]) => !goal(g).milestones[i].done); openPicker(k < 0 ? "add" : "swap", k); }
+      else if (a === "add") { if (["lock", "meditate"].includes(S.screen)) go("goals"); openAddSheet(); }
+      else go(a);
+      break;
+    case "goal": S.goalId = a; go("goal"); break;
+    case "back": go(S.prev === "today" ? "today" : "goals"); break;
+    case "toggle": toggleMilestone(a, +b); break;
+    case "filter": S.filter = a; render(); break;
+    case "badge": showBadge(a); break;
+    case "fav": { const p = curPhrase(); p.fav = !p.fav; render(); toast(p.fav ? "Saved to favorites. It'll come around more often." : "Removed from favorites."); break; }
+    case "addthought": openThoughtSheet(); break;
+    case "savethought": {
+      const line = $("#thoughtLine").value.trim(); if (!line) { $("#thoughtLine").focus(); return; }
+      S.phraseIdx = addPhrase(line, $("#thoughtSub").value.trim());
+      $("#overlay").innerHTML = ""; render(); toast("Saved. It's in your morning rotation now."); break;
+    }
+    case "breakdown": {
+      const steps = ["#bd1", "#bd2", "#bd3"].map(x => $(x).value.trim()).filter(Boolean);
+      if (!steps.length) { $("#bd1").focus(); return; }
+      const g = goal(a), i = +b, extra = steps.length - 1;
+      g.milestones.splice(i, 1, ...steps.map((t, k) => ({ t, when: k === 0 ? "Today" : undefined })));
+      S.focus = S.focus.map(([fg, fi, mine]) => (fg === a && fi > i ? [fg, fi + extra, mine] : [fg, fi, mine]));
+      if (S.nudge[0] === a && S.nudge[1] > i) S.nudge = [a, S.nudge[1] + extra];
+      delete S.swapCounts[a + ":" + i];
+      if (S.focus.length < MAX_FOCUS && !S.focus.some(([fg, fi]) => fg === a && fi === i)) S.focus.push([a, i, true]);
+      $("#overlay").innerHTML = ""; render();
+      toast(`Broken into ${steps.length} steps. The first one is on today's list.`); break;
+    }
+    case "keepstep": S.swapCounts[a + ":" + b] = 0; $("#overlay").innerHTML = ""; toast("Kept as is. No problem."); break;
+    case "voice": S[a] = !S[a]; render(); break;
+    case "headphones": S.headphones = !S.headphones; render(); if (S.screen !== "assistant") toast(S.headphones ? "Headphones connected (simulated)." : "Headphones disconnected (simulated)."); break;
+    case "askchip": sendAsk(el.dataset.q); break;
+    case "askmore": sendAsk("Give me another bit of inspiration"); break;
+    case "listen":
+      S.listening = true; render();
+      setTimeout(() => { if (!S.listening) return; S.listening = false; sendAsk(VOICE_SAMPLES[S.voiceSample++ % VOICE_SAMPLES.length]); }, 1800);
+      break;
+    case "stoplisten": S.listening = false; render(); break;
+    case "savequote": { const it = INSPIRE[a][+b]; addPhrase(it.text, it.src); toast("Saved to your thoughts."); break; }
+    case "aimark": {
+      const g = goal(a), m = g.milestones[+b];
+      if (m.done) return;
+      S.chat.push({ role: "ai", html: `<p>Marked "${esc(m.t)}" done. One more step behind you.</p>`, spoken: willSpeak() });
+      if (willSpeak()) speak("Marked done. One more step behind you.");
+      toggleMilestone(a, +b); break;
+    }
+    case "undo": {
+      S.goals = S.goals.filter(g => g.id !== a);
+      S.chat.push({ role: "ai", html: "<p>Removed it. No problem.</p>" }); render(); break;
+    }
+    case "swap": openPicker("swap", +a); break;
+    case "addfocus": openPicker("add"); break;
+    case "pickfocus": {
+      const entry = [a, +b, true];
+      $("#overlay").innerHTML = "";
+      if (S.pick.mode === "swap") {
+        const [og, oi] = S.focus[S.pick.idx];
+        const key = og + ":" + oi;
+        S.swapCounts[key] = (S.swapCounts[key] || 0) + 1;
+        S.focus[S.pick.idx] = entry; render();
+        if (S.swapCounts[key] >= 3) setTimeout(() => openNudge(og, oi), 350);
+        else toast("Swapped. The other step will come back another day.");
+      } else { S.focus.push(entry); render(); toast("Added to today."); }
+      break;
+    }
+    case "add": openAddSheet(); break;
+    case "closesheet": $("#overlay").innerHTML = ""; break;
+    case "nextcele": S.celebrate.shift(); showCelebration(); break;
+    case "pref": S.prefs[a] = !S.prefs[a]; render(); break;
+    case "tone": S.prefs.tone = a; render(); break;
+    case "restart": S = freshState(); $("#overlay").innerHTML = ""; $("#toastHost").innerHTML = ""; render(true); break;
+    case "addms": {
+      const v = $("#newMs").value.trim(); if (!v) { $("#newMs").focus(); return; }
+      goal(S.goalId).milestones.push({ t: v }); render(); toast("Milestone added."); break;
+    }
+    case "addnote": {
+      const v = $("#noteText").value.trim(); if (!v) { $("#noteText").focus(); return; }
+      goal(S.goalId).notes.unshift({ d: "Today", t: v });
+      if (notesTotal() >= 10 && !badge("reflective").count) { earn("reflective"); render(); showCelebration(); }
+      else { render(); toast("Update saved."); }
+      break;
+    }
+    case "pickcat":
+      document.querySelectorAll("#catChips [data-cat]").forEach(c => c.setAttribute("aria-pressed", c.dataset.cat === a));
+      break;
+    case "newcat": $("#newCatRow").hidden = false; $("#newCatName").focus(); break;
+    case "savecat": {
+      const name = $("#newCatName").value.trim(); if (!name) { $("#newCatName").focus(); return; }
+      const id = "c" + Date.now();
+      const color = NEW_COLORS[(S.cats.length - 3) % NEW_COLORS.length];
+      S.cats.push({ id, name, color });
+      const chip = document.createElement("button");
+      chip.className = "pill"; chip.dataset.act = "pickcat:" + id; chip.dataset.cat = id;
+      chip.innerHTML = `<span class="dot" style="background:${color}"></span>${esc(name)}`;
+      $("#catChips").insertBefore(chip, $("#newCatBtn"));
+      document.querySelectorAll("#catChips [data-cat]").forEach(c => c.setAttribute("aria-pressed", c.dataset.cat === id));
+      $("#newCatName").value = ""; $("#newCatRow").hidden = true;
+      break;
+    }
+    case "pickhz":
+      document.querySelectorAll("#hzSeg button").forEach(c => c.setAttribute("aria-pressed", c.dataset.hz === a));
+      $("#hzHelp").textContent = HORIZON_HELP[a];
+      break;
+    case "savegoal": {
+      const title = $("#gTitle").value.trim();
+      if (!title) { $("#gErr").hidden = false; $("#gTitle").focus(); return; }
+      const c = document.querySelector('#catChips [aria-pressed="true"]')?.dataset.cat || "pro";
+      const h = document.querySelector('#hzSeg [aria-pressed="true"]')?.dataset.hz || "short";
+      const ms = ["#gm1", "#gm2", "#gm3"].map(s => $(s).value.trim()).filter(Boolean).map(t => ({ t }));
+      const g = { id: "g" + Date.now(), title, cat: c, horizon: h, target: $("#gTarget").value.trim() || "no set date", milestones: ms.length ? ms : [{ t: "Decide on a first small step" }], notes: [] };
+      S.goals.push(g); S.filter = "all"; S.goalId = g.id;
+      $("#overlay").innerHTML = ""; go("goal");
+      toast("Goal added. Your first milestone is waiting.");
+      break;
+    }
+  }
+});
+
+document.addEventListener("submit", e => {
+  if (e.target.id !== "askForm") return;
+  e.preventDefault();
+  const v = $("#askInput").value; sendAsk(v);
+  setTimeout(() => $("#askInput")?.focus(), 0);
+});
+document.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  if (e.target.id === "newMs") document.querySelector('[data-act="addms"]').click();
+  if (e.target.id === "newCatName") document.querySelector('[data-act="savecat"]').click();
+});
+document.addEventListener("change", e => { if (e.target.id === "digestTime") S.prefs.time = e.target.value; });
+
+$("#brandMark").innerHTML = ICONS.cairn;
+render(true);
+</script>
