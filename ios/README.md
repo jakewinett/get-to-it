@@ -58,6 +58,25 @@ Do these once, in this order:
 
 Not yet: Goals and Badges tabs, swap and break-down, notes, reminders, the assistant and voice.
 
+## Xcode Cloud (automatic TestFlight builds)
+
+Xcode Cloud builds from the repo. The Xcode project isn't committed, so
+`ci_scripts/ci_post_clone.sh` writes the config, installs XcodeGen, generates the project, and
+resolves Swift packages before each build. GitHub's iOS build runs the same script, so a PR that
+breaks it fails there first.
+
+Workflow settings (App Store Connect → Get To It → Xcode Cloud → Manage Workflows):
+- **Environment:** add `SUPABASE_PUBLISHABLE_KEY` with the `sb_publishable_` key. The team ID comes
+  from Xcode Cloud's own `CI_TEAM_ID`.
+- **General:** project `ios/GetToIt.xcodeproj`, scheme `GetToIt`.
+- **Start condition:** branch changes on `main`.
+- **Action:** Archive, iOS, deployment preparation **TestFlight (Internal Testing Only)**.
+- **Post-action:** TestFlight Internal Testing, your internal group.
+
+Xcode Cloud sets the build number itself, so there's no need to raise `CURRENT_PROJECT_VERSION` for
+cloud builds. If an upload is rejected for a duplicate build number, set the next build number in
+App Store Connect → Xcode Cloud → Settings.
+
 ## CI
 
 `.github/workflows/ios-build.yml` generates the project and builds it for the simulator on a macOS
