@@ -37,11 +37,14 @@ jobs:
           if [ -n "$(git status --porcelain -- GetToIt.xcodeproj GetToIt/Info.plist GetToIt/GetToIt.entitlements)" ]; then
             echo "::error::The committed Xcode project is out of date. Run 'xcodegen' in ios/ and commit the result."
             git status --porcelain -- GetToIt.xcodeproj GetToIt/Info.plist GetToIt/GetToIt.entitlements
-            git diff --stat -- GetToIt.xcodeproj
+            # The full diff, so a session without XcodeGen (a Linux cloud container) can apply it.
+            git diff -- GetToIt.xcodeproj GetToIt/Info.plist GetToIt/GetToIt.entitlements
             exit 1
           fi
 
+      # Builds the regenerated project even when the check above failed, so compile errors still show.
       - name: Build
+        if: ${{ !cancelled() }}
         run: |
           xcodebuild build \
             -project GetToIt.xcodeproj \

@@ -112,12 +112,15 @@ struct NewGoal: Encodable {
     let title: String
     let categoryId: UUID
     let horizon: String
+    /// "yyyy-MM-dd" when picked from the calendar; nil for free-text targets like "April 2027".
+    let targetDate: String?
     let targetLabel: String?
     let source = "ios"
 
     enum CodingKeys: String, CodingKey {
         case title, horizon, source
         case categoryId = "category_id"
+        case targetDate = "target_date"
         case targetLabel = "target_label"
     }
 }

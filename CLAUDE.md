@@ -25,6 +25,7 @@ Calm, and built to get you moving. Copy points at the next concrete step.
 |---|---|
 | `prototype/index.html` | Click-through prototype, single file, the source of truth for UX and design tokens |
 | `supabase/migrations/` | Schema, RLS and app logic in SQL. Files are named with the version Supabase recorded |
+| `supabase/functions/assistant/` | Edge Function: the Ask assistant (Claude tool loop). Needs secret `ANTHROPIC_API_KEY` |
 | `supabase/tests/` | `auth_stub.sql` (stand-in for Supabase auth and default grants) and `behavior.sql` (checks that raise on failure) |
 | `.github/workflows/db-check.yml` | CI: Postgres 17, apply all migrations, run behavior checks, on any change under `supabase/` |
 | `.github/workflows/ios-build.yml` | CI: macOS runner, runs `ci_post_clone.sh` + simulator build, on any change under `ios/` |
@@ -95,11 +96,12 @@ Make the 1024×1024 asset from that drawing.
 - Voice: Speech framework (on-device) for input, AVSpeechSynthesizer for replies. Detect headphones
   with `AVAudioSession` route changes. Speak replies with headphones by default; without headphones
   it's off unless the user turns it on.
-- Assistant: a Supabase Edge Function calling Claude, with each app action exposed as a tool. Log
-  every turn to `assistant_turns`.
+- Assistant: started in `supabase/functions/assistant` (goal and milestone tools, logs to
+  `assistant_turns`). Add a tool there for each new app action.
 - Siri Shortcuts via App Intents ("tell Get To It I ran 3 miles").
-- Morning digest: APNs push from a scheduled Edge Function. Use `push_tokens` and `reminder_log`
-  so it never sends twice.
+- Morning digest: today it's local notifications (`Features/Reminders/DailyReminder.swift`). The server
+  version is an APNs push from a scheduled Edge Function, using `push_tokens`, `reminder_log` and
+  `profiles.digest_time`, so it's always current and never sends twice.
 
 ## Git and PRs
 - Commit as `Jake Winett <jakewinett@users.noreply.github.com>`. GitHub blocks pushes that expose

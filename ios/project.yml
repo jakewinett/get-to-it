@@ -44,6 +44,9 @@ targets:
         SupabasePublishableKey: $(SUPABASE_PUBLISHABLE_KEY)
         # Only standard HTTPS encryption, so App Store Connect stops asking about export compliance.
         ITSAppUsesNonExemptEncryption: false
+        # The assistant's voice input. Speech is recognized on the device when the phone supports it.
+        NSMicrophoneUsageDescription: Get To It listens when you tap the mic, so you can add and update goals by voice.
+        NSSpeechRecognitionUsageDescription: Get To It turns what you say into text for the assistant.
     entitlements:
       path: GetToIt/GetToIt.entitlements
       properties:

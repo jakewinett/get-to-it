@@ -2,13 +2,16 @@ import SwiftUI
 
 struct AddGoalSheet: View {
     let categories: [Category]
-    let onSave: (_ title: String, _ category: Category, _ horizon: String, _ target: String, _ steps: [String]) async -> Bool
+    let onSave: (_ title: String, _ category: Category, _ horizon: String, _ target: String, _ targetDate: Date?, _ steps: [String]) async -> Bool
 
     @Environment(\.dismiss) private var dismiss
     @State private var title = ""
     @State private var categoryID: UUID?
     @State private var horizon = "short"
     @State private var target = ""
+    /// Set only by the date picker. Typing over the picked date turns the target back into free text.
+    @State private var targetDate: Date?
+    @State private var showingDatePicker = false
     @State private var steps = ["", "", ""]
     @State private var isSaving = false
 
@@ -40,7 +43,25 @@ struct AddGoalSheet: View {
                         Text("Long").tag("long")
                     }
                     .pickerStyle(.segmented)
-                    TextField("Target date (optional), e.g. April 2027", text: $target)
+                    HStack {
+                        TextField("Target date (optional), e.g. April 2027", text: $target)
+                            .onChange(of: target) { _, newValue in
+                                if let date = targetDate, newValue != Self.label(for: date) { targetDate = nil }
+                            }
+                        Button {
+                            withAnimation { showingDatePicker.toggle() }
+                        } label: {
+                            Image(systemName: showingDatePicker ? "calendar.circle.fill" : "calendar")
+                                .font(.title3)
+                        }
+                        .buttonStyle(.borderless)
+                        .accessibilityLabel(showingDatePicker ? "Hide the calendar" : "Pick a target date")
+                    }
+                    if showingDatePicker {
+                        DatePicker("Target date", selection: pickedDate, in: Calendar.current.startOfDay(for: .now)...,
+                                   displayedComponents: .date)
+                            .datePickerStyle(.graphical)
+                    }
                 } header: {
                     Text("Time frame")
                 } footer: {
@@ -70,6 +91,22 @@ struct AddGoalSheet: View {
         }
     }
 
+    /// The picker writes the date and its label into the text field, then folds away.
+    private var pickedDate: Binding<Date> {
+        Binding(
+            get: { targetDate ?? Calendar.current.date(byAdding: .month, value: 1, to: .now) ?? .now },
+            set: { date in
+                targetDate = date
+                target = Self.label(for: date)
+                withAnimation { showingDatePicker = false }
+            }
+        )
+    }
+
+    static func label(for date: Date) -> String {
+        date.formatted(.dateTime.month(.abbreviated).day().year())
+    }
+
     private var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
 
     private var horizonHelp: String {
@@ -85,7 +122,7 @@ struct AddGoalSheet: View {
         isSaving = true
         let cleanSteps = steps.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
         let saved = await onSave(trimmedTitle, category, horizon,
-                                 target.trimmingCharacters(in: .whitespacesAndNewlines), cleanSteps)
+                                 target.trimmingCharacters(in: .whitespacesAndNewlines), targetDate, cleanSteps)
         isSaving = false
         if saved { dismiss() }
     }
