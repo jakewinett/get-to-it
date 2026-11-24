@@ -22,17 +22,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install XcodeGen
-        run: brew install xcodegen
-
-      - name: Placeholder config
-        run: |
-          sed -e 's/REPLACE_WITH_PUBLISHABLE_KEY/sb_publishable_ci_placeholder/' \
-              -e 's/REPLACE_WITH_TEAM_ID//' \
-              Config/Secrets.xcconfig.example > Config/Secrets.xcconfig
-
-      - name: Generate Xcode project
-        run: xcodegen
+      # Same script Xcode Cloud runs, so every PR also tests the Xcode Cloud setup:
+      # writes the config, installs XcodeGen, generates the project, resolves packages.
+      - name: Run Xcode Cloud post-clone script
+        env:
+          CI_PRIMARY_REPOSITORY_PATH: ${{ github.workspace }}
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+        run: ./ci_scripts/ci_post_clone.sh
 
       - name: Build
         run: |

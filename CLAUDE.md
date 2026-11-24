@@ -27,9 +27,10 @@ Calm, and built to get you moving. Copy points at the next concrete step.
 | `supabase/migrations/` | Schema, RLS and app logic in SQL. Files are named with the version Supabase recorded |
 | `supabase/tests/` | `auth_stub.sql` (stand-in for Supabase auth and default grants) and `behavior.sql` (checks that raise on failure) |
 | `.github/workflows/db-check.yml` | CI: Postgres 17, apply all migrations, run behavior checks, on any change under `supabase/` |
-| `.github/workflows/ios-build.yml` | CI: macOS runner, `xcodegen` + simulator build, on any change under `ios/` |
+| `.github/workflows/ios-build.yml` | CI: macOS runner, runs `ci_post_clone.sh` + simulator build, on any change under `ios/` |
 | `DECISIONS.md` | Product and technical decisions |
 | `ios/` | SwiftUI app, generated with XcodeGen from `ios/project.yml` (see `ios/README.md`) |
+| `ios/ci_scripts/ci_post_clone.sh` | Xcode Cloud setup: config, XcodeGen, package resolution. GitHub's iOS build runs it too |
 | `web/` | *Later:* Next.js companion |
 
 ## Backend (Supabase)
