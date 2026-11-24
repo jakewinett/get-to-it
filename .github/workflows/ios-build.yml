@@ -30,12 +30,16 @@ jobs:
           SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
         run: ./ci_scripts/ci_post_clone.sh
 
-      # TEMPORARY (bootstrap): print the generated project so it can be committed. Removed in the next commit.
-      - name: Export generated project
+      # The project is committed (Xcode Cloud needs the shared scheme in the repo). The script above
+      # regenerated it from project.yml, so any difference means someone forgot to run xcodegen.
+      - name: Check committed project matches project.yml
         run: |
-          echo "=====BEGIN-PROJECT-TGZ====="
-          tar czf - GetToIt.xcodeproj GetToIt/Info.plist GetToIt/GetToIt.entitlements | base64 | fold -w 100
-          echo "=====END-PROJECT-TGZ====="
+          if [ -n "$(git status --porcelain -- GetToIt.xcodeproj GetToIt/Info.plist GetToIt/GetToIt.entitlements)" ]; then
+            echo "::error::The committed Xcode project is out of date. Run 'xcodegen' in ios/ and commit the result."
+            git status --porcelain -- GetToIt.xcodeproj GetToIt/Info.plist GetToIt/GetToIt.entitlements
+            git diff --stat -- GetToIt.xcodeproj
+            exit 1
+          fi
 
       - name: Build
         run: |
