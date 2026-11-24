@@ -1,8 +1,10 @@
 # Get To It — iOS
 
 SwiftUI app, iOS 17+, bundle ID `com.techvantage.gettoit`. The Xcode project is generated from
-`project.yml` with [XcodeGen](https://github.com/yonaskolb/XcodeGen), so only the spec and sources are
-committed.
+`project.yml` with [XcodeGen](https://github.com/yonaskolb/XcodeGen) **and committed**, because
+Xcode Cloud only accepts a shared scheme that's in the repo. Edit `project.yml`, never the project
+in Xcode's settings. After changing `project.yml` or adding or removing files, run `xcodegen` and
+commit the regenerated project. CI fails if they don't match.
 
 ## First run on the Mac
 
@@ -60,9 +62,9 @@ Not yet: Goals and Badges tabs, swap and break-down, notes, reminders, the assis
 
 ## Xcode Cloud (automatic TestFlight builds)
 
-Xcode Cloud builds from the repo. The Xcode project isn't committed, so
-`ci_scripts/ci_post_clone.sh` writes the config, installs XcodeGen, generates the project, and
-resolves Swift packages before each build. GitHub's iOS build runs the same script, so a PR that
+Xcode Cloud builds from the repo. `ci_scripts/ci_post_clone.sh` writes the config (which is
+gitignored), installs XcodeGen, regenerates the project, and resolves Swift packages before each
+build. GitHub's iOS build runs the same script, so a PR that
 breaks it fails there first.
 
 Workflow settings (App Store Connect → Get To It → Xcode Cloud → Manage Workflows):
