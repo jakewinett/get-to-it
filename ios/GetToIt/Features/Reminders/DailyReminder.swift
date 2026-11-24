@@ -8,10 +8,11 @@ import UserNotifications
 /// every time Today loads or a step changes. If the app isn't opened for a while, the later
 /// reminders still arrive, with the step as it was when the app last ran.
 /// (A server-sent push digest, planned later, would always be current.)
+@MainActor
 enum DailyReminder {
-    static let enabledKey = "dailyReminderEnabled"
-    static let minutesKey = "dailyReminderMinutes"
-    static let defaultMinutes = 7 * 60 + 30
+    nonisolated static let enabledKey = "dailyReminderEnabled"
+    nonisolated static let minutesKey = "dailyReminderMinutes"
+    nonisolated static let defaultMinutes = 7 * 60 + 30
     private static let idPrefix = "daily-reminder-"
     private static let daysAhead = 14
 
