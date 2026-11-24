@@ -1,0 +1,50 @@
+# XcodeGen spec. Generate the Xcode project with `xcodegen` in this folder.
+# The generated GetToIt.xcodeproj, Info.plist and entitlements are not committed.
+name: GetToIt
+options:
+  bundleIdPrefix: com.techvantage
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+configFiles:
+  Debug: Config/Base.xcconfig
+  Release: Config/Base.xcconfig
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift
+    from: "2.5.0"
+targets:
+  GetToIt:
+    type: application
+    platform: iOS
+    sources:
+      - GetToIt
+    dependencies:
+      - package: Supabase
+        product: Supabase
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.techvantage.gettoit
+        PRODUCT_NAME: GetToIt
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        GENERATE_INFOPLIST_FILE: NO
+    info:
+      path: GetToIt/Info.plist
+      properties:
+        CFBundleDisplayName: Get To It
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        SupabaseURL: $(SUPABASE_URL)
+        SupabasePublishableKey: $(SUPABASE_PUBLISHABLE_KEY)
+    entitlements:
+      path: GetToIt/GetToIt.entitlements
+      properties:
+        com.apple.developer.applesignin:
+          - Default
+    scheme: {}
