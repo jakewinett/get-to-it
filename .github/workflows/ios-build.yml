@@ -46,4 +46,5 @@ jobs:
 
       - name: Show errors
         if: failure()
-        run: grep -E "error:|warning: .*deprecated" build.log | head -50 || true
+        run: |
+          grep -E "error:" build.log | head -50 || true
