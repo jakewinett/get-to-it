@@ -30,6 +30,13 @@ jobs:
           SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
         run: ./ci_scripts/ci_post_clone.sh
 
+      # TEMPORARY (bootstrap): print the generated project so it can be committed. Removed in the next commit.
+      - name: Export generated project
+        run: |
+          echo "=====BEGIN-PROJECT-TGZ====="
+          tar czf - GetToIt.xcodeproj GetToIt/Info.plist GetToIt/GetToIt.entitlements | base64 | fold -w 100
+          echo "=====END-PROJECT-TGZ====="
+
       - name: Build
         run: |
           xcodebuild build \
