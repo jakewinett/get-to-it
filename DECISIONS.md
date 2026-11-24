@@ -28,17 +28,16 @@ Name: **GetToIt**. Tagline: *Bring practice to your purpose.*
 - Stack: **SwiftUI** iOS app + **Next.js** web companion, both on Supabase.
 
 ## Backend
-- Schema: `supabase/migrations/20261123000000_init.sql` (tested on local Postgres 16; not applied anywhere yet).
+- Supabase project **Get To It** (`dseikrlmwwbguyvdamif`), TechVantage LLC org, us-west-1. Live migrations: `init`, `harden_grants_and_fk_indexes`.
+- Migration files are named with the version Supabase recorded, so the CLI and the hosted project agree.
 - Badge, activity-day and swap-nudge rules live in SQL functions so iOS, web and the assistant behave the same:
   `complete_milestone`, `uncomplete_milestone`, `add_note`, `swap_focus_item`, `swap_streak`, `breakdown_milestone`.
 - Clients can read badges but can't award them; only the functions can.
 - Curated thoughts are rows with no owner; the user's own thoughts are private rows.
 
 ## Open
-- Supabase project in the TechVantage LLC org (Pro).
 - GitHub repo to hold the code.
 - Reserve "GetToIt" in App Store Connect (the real availability check).
-- Supabase connector can only see the EvanReads org; it needs access to the TechVantage org.
 
 ## Artifacts
 - Click-through prototype: `prototype/index.html` (published privately as "GetToIt Prototype").
