@@ -1,0 +1,103 @@
+# Get To It — notes for Claude
+
+*Bring practice to your purpose.* A personal goal app for one person (the repo owner): a daily thought,
+a short list of next steps, milestone-based goals with notes, badges for showing up, and a voice/text assistant.
+
+Read `DECISIONS.md` before changing product behavior. It is the record of what was decided and why.
+The click-through prototype (`prototype/index.html`, open it in a browser) is the approved UX: match its
+flows, copy and visual tokens unless the user asks otherwise.
+
+## Working with the user
+- The user decides. Challenge assumptions first, say what you're unsure of, and tag claims
+  [CERTAIN] / [LIKELY] / [GUESSING]. No filler like "Great question" or "Absolutely".
+- Ask one clarifying question at a time when something is genuinely theirs to decide.
+- Keep it simple. Less is more in both the product and the code.
+
+## Tone of the app's copy
+Calm, and built to get you moving. Copy points at the next concrete step.
+- Do: "Let's get to it", "Your next big move", "Done. What's next?", "Missed yesterday? Start today."
+- Don't: passive reassurance ("Ready when you are", "Anything more is a bonus") or shame.
+- Missed days never reset anything. The response to a miss is "start now", not "that's fine".
+- Visible name: **Get To It** (with spaces). Brand spelling: GetToIt.
+
+## Repo layout
+| Path | What |
+|---|---|
+| `prototype/index.html` | Click-through prototype, single file, the source of truth for UX and design tokens |
+| `supabase/migrations/` | Schema, RLS and app logic in SQL. Files are named with the version Supabase recorded |
+| `supabase/tests/` | `auth_stub.sql` (stand-in for Supabase auth and default grants) and `behavior.sql` (checks that raise on failure) |
+| `.github/workflows/db-check.yml` | CI: Postgres 17, apply all migrations, run behavior checks, on any change under `supabase/` |
+| `DECISIONS.md` | Product and technical decisions |
+| `ios/` | *Next:* SwiftUI app |
+| `web/` | *Later:* Next.js companion |
+
+## Backend (Supabase)
+- Project **Get To It**, ref `dseikrlmwwbguyvdamif`, org TechVantage LLC (Pro), region us-west-1.
+  Live migrations: `20261123200202_init`, `20261123200235_harden_grants_and_fk_indexes`.
+- Business rules live in SQL so iOS, web and the assistant agree. Clients call these via RPC:
+  `complete_milestone(uuid)` and `add_note(goal, body, source)` return the badges earned;
+  `uncomplete_milestone`, `swap_focus_item(out, in)` (returns the swap streak; show the
+  break-it-down nudge at 3), `swap_streak`, `breakdown_milestone(uuid, text[])`.
+- Clients never write `badges_earned`, `activity_days`, `reminder_log` or `assistant_turns` directly.
+  Everything else is plain CRUD under RLS (`user_id = auth.uid()`).
+- A new auth user automatically gets a `profiles` row and the categories Professional, Personal and Physical.
+- Curated thoughts are `thoughts` rows with `user_id is null`. The user's own thoughts are private rows.
+
+### Changing the schema
+1. Write a new migration. Never edit one that is already live.
+2. Add or extend checks in `supabase/tests/behavior.sql`. Each check must `raise exception` on failure.
+3. Run locally against an empty Postgres 16+ (commands in `README.md`), then let CI confirm.
+4. Apply to the live project only after CI is green. Then rename the file to the version Supabase
+   recorded (`list_migrations`), so the CLI and the hosted project agree.
+5. Run Supabase's security and performance advisors after every DDL change. Two warnings are
+   intentional: signed-in users may execute `complete_milestone` and `add_note` (SECURITY DEFINER).
+   They are the only way badges are awarded, and each checks ownership itself.
+
+## Next step: the iOS app
+Goal: the smallest end-to-end slice. An Xcode project in `ios/`, Sign in with Apple, a session with
+the live Supabase project, and the Today screen reading real data.
+
+- SwiftUI. iOS 17+ unless there's a reason otherwise. Use `supabase-swift` through Swift Package Manager.
+- Sign in with Apple, done natively: `ASAuthorizationAppleIDProvider` with a hashed nonce, then
+  `supabase.auth.signInWithIdToken(credentials: .init(provider: .apple, idToken:, nonce:))`.
+  Check the current supabase-swift docs for exact signatures.
+- Bundle ID: proposed `com.techvantage.gettoit`. Confirm with the user before creating it.
+- Config: the Supabase URL and publishable (anon) key go in an xcconfig that is gitignored, with a
+  committed `*.example` beside it. Never commit `.p8` keys, service-role keys or tokens.
+- Apple Developer setup the user must do (Claude can't): an App ID with Sign in with Apple, a
+  Services ID, and a Sign in with Apple key (`.p8`). The user enters these in the Supabase dashboard
+  under Auth → Providers → Apple. Never ask for the key in chat.
+- Build and run with Xcode on the user's Mac. Verify in the simulator before calling anything done.
+
+### Design tokens (from the prototype's `:root`)
+| Token | Light | Use |
+|---|---|---|
+| accent | `#2C6A77` | primary actions, app icon tile |
+| accent-ink | `#FFFFFF` | text and icons on accent |
+| accent-soft | `#DDEBEE` | thought card, soft fills |
+| ink / muted | `#1C2A30` / `#5B6B72` | text |
+| surface / card / line | `#F6F8F8` / `#FFFFFF` / `#DCE4E6` | backgrounds, borders |
+| gold / gold-soft | `#A97A22` / `#F4E8CF` | badges |
+| category colors | pro `#4A6EA3`, per `#B0627A`, phy `#4F8757`; new: `#7B66A8`, `#2F8A84`, `#9A7043` | |
+
+Dark values are in the prototype's dark-mode blocks. Use them for the iOS dark appearance.
+Type: the prototype uses Figtree (UI) and Newsreader italic (daily thoughts). [GUESSING] On iOS, SF Pro
+plus New York italic is the native equivalent. Confirm with the user before adding custom fonts.
+App icon: two footprints stepping upward on the accent tile (the `mark` SVG in the prototype).
+Make the 1024×1024 asset from that drawing.
+
+### Later
+- Voice: Speech framework (on-device) for input, AVSpeechSynthesizer for replies. Detect headphones
+  with `AVAudioSession` route changes. Speak replies with headphones by default; without headphones
+  it's off unless the user turns it on.
+- Assistant: a Supabase Edge Function calling Claude, with each app action exposed as a tool. Log
+  every turn to `assistant_turns`.
+- Siri Shortcuts via App Intents ("tell Get To It I ran 3 miles").
+- Morning digest: APNs push from a scheduled Edge Function. Use `push_tokens` and `reminder_log`
+  so it never sends twice.
+
+## Git and PRs
+- Commit as `Jake Winett <jakewinett@users.noreply.github.com>`. GitHub blocks pushes that expose
+  the private email.
+- Branch from `main` and open a draft PR. The user reviews, and PRs are squash-merged.
+- Keep `DECISIONS.md` current when a decision changes.
