@@ -42,6 +42,8 @@ targets:
           - UIInterfaceOrientationPortrait
         SupabaseURL: $(SUPABASE_URL)
         SupabasePublishableKey: $(SUPABASE_PUBLISHABLE_KEY)
+        # Only standard HTTPS encryption, so App Store Connect stops asking about export compliance.
+        ITSAppUsesNonExemptEncryption: false
     entitlements:
       path: GetToIt/GetToIt.entitlements
       properties:
