@@ -18,7 +18,13 @@ enum Backend {
         guard !key.hasPrefix("REPLACE_WITH") else {
             configError("SUPABASE_PUBLISHABLE_KEY still has the placeholder value. Paste the sb_publishable_ key from the Supabase dashboard.")
         }
-        return SupabaseClient(supabaseURL: url, supabaseKey: key)
+        return SupabaseClient(
+            supabaseURL: url,
+            supabaseKey: key,
+            // Report the saved session at launch even if it has expired; AuthModel checks
+            // isExpired and waits for the refresh. This becomes the default in supabase-swift 3.
+            options: SupabaseClientOptions(auth: .init(emitLocalSessionAsInitialSession: true))
+        )
     }()
 
     private static func configError(_ problem: String) -> Never {
