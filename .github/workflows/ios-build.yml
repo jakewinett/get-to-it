@@ -27,8 +27,9 @@ jobs:
 
       - name: Placeholder config
         run: |
-          cp Config/Secrets.xcconfig.example Config/Secrets.xcconfig
-          echo "SUPABASE_PUBLISHABLE_KEY = sb_publishable_ci_placeholder" >> Config/Secrets.xcconfig
+          sed -e 's/REPLACE_WITH_PUBLISHABLE_KEY/sb_publishable_ci_placeholder/' \
+              -e 's/REPLACE_WITH_TEAM_ID//' \
+              Config/Secrets.xcconfig.example > Config/Secrets.xcconfig
 
       - name: Generate Xcode project
         run: xcodegen

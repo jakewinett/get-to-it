@@ -12,7 +12,9 @@ committed.
    brew install xcodegen
    ```
 
-2. Create your local config and fill in the publishable key and your Team ID:
+2. Create your local config, then replace the two `REPLACE_WITH_…` values **on their existing lines**.
+   Don't add new lines for them: in xcconfig files the last line wins, so a later duplicate overrides
+   your value. If a value is missing at launch, the app stops with a message naming it.
 
    ```bash
    cp Config/Secrets.xcconfig.example Config/Secrets.xcconfig
@@ -25,6 +27,15 @@ committed.
    ```
 
 4. Pick an iPhone simulator and run. Run `xcodegen` again whenever files are added or `project.yml` changes.
+
+## Uploading a TestFlight build
+
+1. Raise `CURRENT_PROJECT_VERSION` in `project.yml`. Every upload needs a higher build number. Then run `xcodegen`.
+2. Choose **Any iOS Device (arm64)** as the destination, then **Product → Archive**.
+3. In the Organizer: **Distribute App → TestFlight Internal Only**.
+
+The app declares that it uses only standard encryption (`ITSAppUsesNonExemptEncryption = NO`), so
+App Store Connect doesn't ask the export-compliance question for each build.
 
 ## Before Sign in with Apple works
 
