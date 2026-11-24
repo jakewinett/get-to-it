@@ -18,7 +18,7 @@ final class AuthModel {
 
     /// Follows the stored session and every sign-in or sign-out after it.
     func listen() async {
-        for await (_, session) in await Backend.client.auth.authStateChanges {
+        for await (_, session) in Backend.client.auth.authStateChanges {
             if let session {
                 state = .signedIn(userID: session.user.id)
             } else {
@@ -56,7 +56,7 @@ final class AuthModel {
             if let name = credential.fullName {
                 let fullName = PersonNameComponentsFormatter().string(from: name)
                 if !fullName.isEmpty {
-                    try? await Backend.client
+                    _ = try? await Backend.client
                         .from("profiles")
                         .update(["display_name": fullName])
                         .eq("id", value: session.user.id.uuidString)

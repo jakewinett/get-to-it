@@ -56,6 +56,34 @@ struct Goal: Decodable, Identifiable, Hashable {
     }
 }
 
+/// One row from todays_focus().
+struct FocusRow: Decodable, Identifiable {
+    let focusId: UUID
+    let milestoneId: UUID
+    let milestoneTitle: String
+    let dueDate: String?
+    var completedAt: String?
+    let goalId: UUID
+    let goalTitle: String
+    let categoryColor: String
+    let pickedBy: String
+
+    var id: UUID { focusId }
+    var isDone: Bool { completedAt != nil }
+
+    enum CodingKeys: String, CodingKey {
+        case focusId = "focus_id"
+        case milestoneId = "milestone_id"
+        case milestoneTitle = "milestone_title"
+        case dueDate = "due_date"
+        case completedAt = "completed_at"
+        case goalId = "goal_id"
+        case goalTitle = "goal_title"
+        case categoryColor = "category_color"
+        case pickedBy = "picked_by"
+    }
+}
+
 struct Thought: Decodable, Identifiable {
     let id: UUID
     let body: String
