@@ -1,6 +1,6 @@
 # GetToIt — decisions so far
 
-Name: **GetToIt**. Tagline: *Bring practice to your purpose.*
+Name: **Get To It** (brand spelling GetToIt). Tagline: *Bring practice to your purpose.*
 ("Cairn" was dropped: an existing private journaling app uses it.)
 
 ## Product
@@ -16,7 +16,8 @@ Name: **GetToIt**. Tagline: *Bring practice to your purpose.*
 - Consistency shown as "X of the last 7 days", not a fragile streak. Missed days never reset anything.
 - Rewards: badges that can't be lost (First Step, Showing Up, Steady, Fresh Start, Halfway, Summit, Long Game, Reflective, Balanced).
 - Reminders: one digest per day, tone Encouraging or Plain, optional long-term nudge and Sunday recap.
-- Assistant ("Ask GetToIt"): text or voice; can answer about goals, log updates, add goals, swap steps, save thoughts, navigate, and give inspiration (quote, short story, idiom, Buddhist wisdom). Every app function should be reachable as an assistant action.
+- Assistant ("Ask"): text or voice; can answer about goals, log updates, add goals, swap steps, save thoughts, navigate, and give inspiration (quote, short story, idiom, Buddhist wisdom). Every app function should be reachable as an assistant action.
+- App mark: two footprints stepping upward on the teal accent tile.
 - Voice replies: on automatically with headphones (iOS detection); off by default without headphones, with a toggle.
 
 ## Platform
@@ -24,8 +25,9 @@ Name: **GetToIt**. Tagline: *Bring practice to your purpose.*
 - AI: Claude via a Supabase Edge Function, app actions exposed as tools.
 - Distribution: TestFlight only, single user for now.
 - Auth: Sign in with Apple.
-
 - Stack: **SwiftUI** iOS app + **Next.js** web companion, both on Supabase.
+- iOS builds happen in a Claude Code session on the user's Mac. Remote Control from a cloud session
+  couldn't reach it (every folder reported "not available").
 
 ## Backend
 - Supabase project **Get To It** (`dseikrlmwwbguyvdamif`), TechVantage LLC org, us-west-1. Live migrations: `init`, `harden_grants_and_fk_indexes`.
@@ -36,8 +38,11 @@ Name: **GetToIt**. Tagline: *Bring practice to your purpose.*
 - Curated thoughts are rows with no owner; the user's own thoughts are private rows.
 
 ## Open
-- GitHub repo to hold the code.
-- Reserve "GetToIt" in App Store Connect (the real availability check).
+- Reserve "Get To It" in App Store Connect (the real availability check).
+- Bundle ID for the iOS app (proposed `com.techvantage.gettoit`).
+
+## Code
+- Repo: `jakewinett/get-to-it` (private). `CLAUDE.md` has the working notes for new sessions.
 
 ## Artifacts
-- Click-through prototype: `prototype/index.html` (published privately as "GetToIt Prototype").
+- Click-through prototype: `prototype/index.html` (published privately as "Get To It Prototype").
