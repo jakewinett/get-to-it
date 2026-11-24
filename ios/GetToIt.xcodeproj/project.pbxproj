@@ -18,15 +18,21 @@
 		BAC669938087A030A58BE7F1 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BEE60E90BAE2817D256618C /* TodayView.swift */; };
 		C9063333FE9E0F2D8E657CED /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD46E06388FAA0872C866B30 /* Theme.swift */; };
 		CC856AC1E923D410A07B6104 /* GetToItApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCDE2F85808AB0329AA9362B /* GetToItApp.swift */; };
+		D362F5A13FBC44DDA1E46695 /* DailyReminder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 542A4F6EA28D0C1FCE46A810 /* DailyReminder.swift */; };
+		E0E07E572BB5CDE5A24944B5 /* AssistantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A934D5E172D17DCDCB066AF /* AssistantView.swift */; };
 		E7944C13144CC8D6FD296FF5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94A4501520A38FD4986E46B8 /* Assets.xcassets */; };
+		F39D488A02F8144C9E213CD4 /* SpeechInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C196B1169883C786EDE8ECE /* SpeechInput.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0A934D5E172D17DCDCB066AF /* AssistantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssistantView.swift; sourceTree = "<group>"; };
 		1BEE60E90BAE2817D256618C /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
 		1C88D881DD87AC7A83E8281E /* Backend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Backend.swift; sourceTree = "<group>"; };
 		274C3093E5F33D8F52F6F6EA /* AddGoalSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddGoalSheet.swift; sourceTree = "<group>"; };
 		28E705317AC00EB717DF3321 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 		4811EDF7C115A6BA4D2E3D9F /* TodayModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayModel.swift; sourceTree = "<group>"; };
+		4C196B1169883C786EDE8ECE /* SpeechInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechInput.swift; sourceTree = "<group>"; };
+		542A4F6EA28D0C1FCE46A810 /* DailyReminder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyReminder.swift; sourceTree = "<group>"; };
 		5C54D4E4D75B0790E1274AB4 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
 		65F0CD2B2842DD5F226BE696 /* GetToIt.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = GetToIt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		696F81A4CC68EF1989C58B6A /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
@@ -69,12 +75,29 @@
 			path = Auth;
 			sourceTree = "<group>";
 		};
+		70D1C0C87C1251257CAA1327 /* Reminders */ = {
+			isa = PBXGroup;
+			children = (
+				542A4F6EA28D0C1FCE46A810 /* DailyReminder.swift */,
+			);
+			path = Reminders;
+			sourceTree = "<group>";
+		};
 		7E38950C9C4E8C0267B4B916 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				65F0CD2B2842DD5F226BE696 /* GetToIt.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		9DCEABBE19AFFE42CC77A3B2 /* Assistant */ = {
+			isa = PBXGroup;
+			children = (
+				0A934D5E172D17DCDCB066AF /* AssistantView.swift */,
+				4C196B1169883C786EDE8ECE /* SpeechInput.swift */,
+			);
+			path = Assistant;
 			sourceTree = "<group>";
 		};
 		9FA997398F1C22DDA73B59EB /* GetToIt */ = {
@@ -101,7 +124,9 @@
 		C42C36506B128FAB3A0DE88C /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				9DCEABBE19AFFE42CC77A3B2 /* Assistant */,
 				5C0A2FA82F7B405457D04CC2 /* Auth */,
+				70D1C0C87C1251257CAA1327 /* Reminders */,
 				DDF9A9CD9696E12A9CB414B5 /* Today */,
 			);
 			path = Features;
@@ -209,12 +234,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				5DABFB1BFBABDA7E8123F74C /* AddGoalSheet.swift in Sources */,
+				E0E07E572BB5CDE5A24944B5 /* AssistantView.swift in Sources */,
 				62BBC63E0C75449A3DB004E3 /* AuthModel.swift in Sources */,
 				1E771138AA83B7D104A99FA0 /* Backend.swift in Sources */,
+				D362F5A13FBC44DDA1E46695 /* DailyReminder.swift in Sources */,
 				CC856AC1E923D410A07B6104 /* GetToItApp.swift in Sources */,
 				12519D337CFADBEEB70CE209 /* Models.swift in Sources */,
 				65E0FE4C80BFDCE11A861104 /* Nonce.swift in Sources */,
 				9BCDC4D7B9DF78D44513B05E /* SignInView.swift in Sources */,
+				F39D488A02F8144C9E213CD4 /* SpeechInput.swift in Sources */,
 				C9063333FE9E0F2D8E657CED /* Theme.swift in Sources */,
 				7740EF08829E1182E9FD6245 /* TodayModel.swift in Sources */,
 				BAC669938087A030A58BE7F1 /* TodayView.swift in Sources */,
