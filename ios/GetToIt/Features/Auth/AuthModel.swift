@@ -16,12 +16,17 @@ final class AuthModel {
     var errorMessage: String?
     private var currentNonce: String?
 
-    /// Follows the stored session and every sign-in or sign-out after it.
+    /// Follows the stored session and every sign-in, refresh or sign-out after it.
     func listen() async {
-        for await (_, session) in Backend.client.auth.authStateChanges {
-            if let session {
+        for await (event, session) in Backend.client.auth.authStateChanges {
+            switch (event, session) {
+            case (.initialSession, let session?) where session.isExpired:
+                // Saved session is stale; supabase-swift refreshes it and sends .tokenRefreshed,
+                // or .signedOut if the refresh fails. Keep showing the spinner until then.
+                continue
+            case (_, let session?):
                 state = .signedIn(userID: session.user.id)
-            } else {
+            case (_, nil):
                 state = .signedOut
             }
         }
