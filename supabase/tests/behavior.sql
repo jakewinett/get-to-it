@@ -126,6 +126,76 @@ begin
   end if;
 end $$;
 
+-- Today's focus ---------------------------------------------------------------
+-- A fresh user, so earlier checks don't affect the picks.
+reset role;
+insert into auth.users (id) values ('33333333-3333-3333-3333-333333333333');
+set role authenticated;
+set request.jwt.sub = '33333333-3333-3333-3333-333333333333';
+
+insert into public.goals (category_id, title, created_at)
+select (select id from public.categories where name = 'Professional'), t, now() - (n || ' minutes')::interval
+from (values ('Due today', 5), ('Due tomorrow', 4), ('No due date', 3), ('Due next week', 2)) v(t, n);
+insert into public.milestones (goal_id, title, position, due_date)
+select g.id, g.title || ' / step ' || k, k,
+       case g.title when 'Due today' then public.local_today(auth.uid())
+                    when 'Due tomorrow' then public.local_today(auth.uid()) + 1
+                    when 'Due next week' then public.local_today(auth.uid()) + 7 end
+from public.goals g, generate_series(1, 2) k;
+
+do $$
+declare v_titles text[];
+begin
+  select array_agg(milestone_title order by sort_order) into v_titles from public.todays_focus();
+  if v_titles is distinct from array['Due today / step 1', 'Due tomorrow / step 1', 'Due next week / step 1'] then
+    raise exception 'focus should pick the first step of 3 goals, soonest due first; got %', v_titles;
+  end if;
+
+  perform public.todays_focus();
+  if (select count(*) from public.focus_items where day = public.local_today(auth.uid())) <> 3 then
+    raise exception 'calling todays_focus again must not add rows';
+  end if;
+
+  -- Finishing a step keeps it on the list and doesn't pull in a fourth.
+  perform public.complete_milestone((select id from public.milestones where title = 'Due today / step 1'));
+  select array_agg(milestone_title order by sort_order) into v_titles from public.todays_focus();
+  if v_titles is distinct from array['Due today / step 1', 'Due tomorrow / step 1', 'Due next week / step 1'] then
+    raise exception 'a finished step should stay and nothing should be added; got %', v_titles;
+  end if;
+  if (select completed_at from public.todays_focus() where milestone_title = 'Due today / step 1') is null then
+    raise exception 'todays_focus should report the finished step as completed';
+  end if;
+
+  -- Swapping replaces the step in place; the swapped-out step is hidden.
+  perform public.swap_focus_item(
+    (select id from public.milestones where title = 'Due tomorrow / step 1'),
+    (select id from public.milestones where title = 'No due date / step 1'));
+  select array_agg(milestone_title order by sort_order) into v_titles from public.todays_focus();
+  if v_titles is distinct from array['Due today / step 1', 'No due date / step 1', 'Due next week / step 1'] then
+    raise exception 'swap should replace the step in place; got %', v_titles;
+  end if;
+  if (select picked_by from public.todays_focus() where milestone_title = 'No due date / step 1') <> 'user' then
+    raise exception 'a swapped-in step should be marked as the user''s pick';
+  end if;
+end $$;
+
+-- A user with no goals gets an empty list; the first goal added mid-day is picked.
+reset role;
+insert into auth.users (id) values ('44444444-4444-4444-4444-444444444444');
+set role authenticated;
+set request.jwt.sub = '44444444-4444-4444-4444-444444444444';
+do $$ begin
+  if exists (select 1 from public.todays_focus()) then
+    raise exception 'a user with no goals should get an empty list';
+  end if;
+  insert into public.goals (category_id, title) values ((select id from public.categories where name = 'Personal'), 'First goal');
+  insert into public.milestones (goal_id, title, position) values ((select id from public.goals where title = 'First goal'), 'First step', 1);
+  if (select array_agg(milestone_title) from public.todays_focus()) is distinct from array['First step'] then
+    raise exception 'the first goal added mid-day should be picked';
+  end if;
+end $$;
+set request.jwt.sub = '11111111-1111-1111-1111-111111111111';
+
 -- Security --------------------------------------------------------------------
 set request.jwt.sub = '22222222-2222-2222-2222-222222222222';
 do $$ begin
@@ -169,6 +239,11 @@ set role anon;
 do $$ begin
   perform public.complete_milestone(gen_random_uuid());
   raise exception 'SECURITY: anon called complete_milestone';
+exception when insufficient_privilege then null;
+end $$;
+do $$ begin
+  perform * from public.todays_focus();
+  raise exception 'SECURITY: anon called todays_focus';
 exception when insufficient_privilege then null;
 end $$;
 do $$ begin

@@ -138,16 +138,16 @@ struct TodayView: View {
         }
     }
 
-    private func focusRow(_ item: TodayModel.FocusItem) -> some View {
+    private func focusRow(_ item: FocusRow) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Button {
                 Task { await model.toggle(item) }
             } label: {
                 ZStack {
                     Circle()
-                        .strokeBorder(item.milestone.isDone ? Theme.accent : Theme.line, lineWidth: 2)
-                        .background(Circle().fill(item.milestone.isDone ? Theme.accent : Theme.card))
-                    if item.milestone.isDone {
+                        .strokeBorder(item.isDone ? Theme.accent : Theme.line, lineWidth: 2)
+                        .background(Circle().fill(item.isDone ? Theme.accent : Theme.card))
+                    if item.isDone {
                         Image(systemName: "checkmark")
                             .font(.system(size: 12, weight: .heavy))
                             .foregroundStyle(Theme.accentInk)
@@ -156,19 +156,19 @@ struct TodayView: View {
                 .frame(width: 26, height: 26)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(item.milestone.isDone ? "Mark not done: \(item.milestone.title)" : "Mark done: \(item.milestone.title)")
-            .sensoryFeedback(.success, trigger: item.milestone.isDone) { _, done in done }
+            .accessibilityLabel(item.isDone ? "Mark not done: \(item.milestoneTitle)" : "Mark done: \(item.milestoneTitle)")
+            .sensoryFeedback(.success, trigger: item.isDone) { _, done in done }
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(item.milestone.title)
+                Text(item.milestoneTitle)
                     .font(.body.weight(.semibold))
-                    .foregroundStyle(item.milestone.isDone ? Theme.muted : Theme.ink)
-                    .strikethrough(item.milestone.isDone, color: Theme.line)
+                    .foregroundStyle(item.isDone ? Theme.muted : Theme.ink)
+                    .strikethrough(item.isDone, color: Theme.line)
                 HStack(spacing: 6) {
                     Circle()
-                        .fill(Theme.category(model.category(for: item.goal)?.color ?? ""))
+                        .fill(Theme.category(item.categoryColor))
                         .frame(width: 8, height: 8)
-                    Text(item.goal.title)
+                    Text(item.goalTitle)
                         .font(.footnote)
                         .foregroundStyle(Theme.muted)
                         .lineLimit(1)

@@ -5,14 +5,10 @@ import Supabase
 @MainActor
 @Observable
 final class TodayModel {
-    struct FocusItem: Identifiable {
-        let goal: Goal
-        let milestone: Milestone
-        var id: UUID { milestone.id }
-    }
-
     private(set) var categories: [Category] = []
     private(set) var goals: [Goal] = []
+    /// Today's steps, picked by the todays_focus() database function.
+    private(set) var focus: [FocusRow] = []
     private(set) var thought: Thought?
     private(set) var activeDays: Set<String> = []
     private(set) var isLoading = true
@@ -20,10 +16,7 @@ final class TodayModel {
     var toast: String?
     var celebrations: [String] = []
 
-    /// Milestones picked for today when the screen loaded. Completed ones stay visible, checked.
-    private var focusIDs: [UUID] = []
     private var badgeNames: [String: String] = [:]
-    private let maxFocus = 3
     private let client = Backend.client
 
     private static let encouragement = [
@@ -35,18 +28,7 @@ final class TodayModel {
 
     // MARK: Derived
 
-    var focus: [FocusItem] {
-        focusIDs.compactMap { id in
-            for goal in goals {
-                if let milestone = goal.milestones.first(where: { $0.id == id }) {
-                    return FocusItem(goal: goal, milestone: milestone)
-                }
-            }
-            return nil
-        }
-    }
-
-    var doneCount: Int { focus.filter { $0.milestone.isDone }.count }
+    var doneCount: Int { focus.filter(\.isDone).count }
 
     /// The last 7 days, oldest first, with whether each had progress.
     var week: [(label: String, active: Bool, isToday: Bool)] {
@@ -59,16 +41,15 @@ final class TodayModel {
 
     var activeThisWeek: Int { week.filter(\.active).count }
 
-    func category(for goal: Goal) -> Category? {
-        categories.first { $0.id == goal.categoryId }
-    }
-
     // MARK: Loading
 
     func load(userID: UUID) async {
         isLoading = goals.isEmpty
         errorMessage = nil
+        // todays_focus() works out "today" from the profile's time zone, so sync it first.
+        await syncTimeZone(userID: userID)
         do {
+            async let focusRows: [FocusRow] = client.rpc("todays_focus").execute().value
             async let categoryRows: [Category] = client.from("categories")
                 .select("id,name,color,position,archived_at")
                 .order("position")
@@ -96,9 +77,11 @@ final class TodayModel {
             let thoughts = try await thoughtRows
             let days = try await dayRows
             let badges = try await badgeRows
+            let loadedFocus = try await focusRows
 
             categories = loadedCategories.filter { $0.archivedAt == nil }
             goals = loadedGoals
+            focus = loadedFocus
             activeDays = Set(days.map(\.day))
             badgeNames = Dictionary(badges.map { ($0.key, $0.name) }, uniquingKeysWith: { first, _ in first })
 
@@ -106,38 +89,10 @@ final class TodayModel {
                 let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
                 thought = thoughts[dayOfYear % thoughts.count]
             }
-            pickFocus()
-            await syncTimeZone(userID: userID)
         } catch {
             errorMessage = "Couldn't load your goals. Check your connection and pull to refresh."
         }
         isLoading = false
-    }
-
-    /// One step per goal: the next open milestone, soonest due date first, up to three open.
-    /// Steps picked earlier today stay on the list, checked or not.
-    private func pickFocus() {
-        var picks = focusIDs.filter { goalID(containing: $0) != nil }
-        let pickedGoals = Set(picks.compactMap { goalID(containing: $0) })
-        var openSlots = maxFocus - picks.filter { !isDone($0) }.count
-
-        let candidates = goals
-            .filter { !pickedGoals.contains($0.id) }
-            .compactMap { goal in goal.nextMilestone }
-            .sorted { ($0.dueDate ?? "9999-12-31") < ($1.dueDate ?? "9999-12-31") }
-        for milestone in candidates where openSlots > 0 {
-            picks.append(milestone.id)
-            openSlots -= 1
-        }
-        focusIDs = picks
-    }
-
-    private func goalID(containing milestoneID: UUID) -> UUID? {
-        goals.first { $0.milestones.contains { $0.id == milestoneID } }?.id
-    }
-
-    private func isDone(_ id: UUID) -> Bool {
-        goals.contains { $0.milestones.contains { $0.id == id && $0.isDone } }
     }
 
     /// "Today" on the server follows the profile's time zone, so keep it matched to the phone.
@@ -150,19 +105,19 @@ final class TodayModel {
 
     // MARK: Actions
 
-    func toggle(_ item: FocusItem) async {
-        if item.milestone.isDone {
+    func toggle(_ item: FocusRow) async {
+        if item.isDone {
             await uncomplete(item)
         } else {
             await complete(item)
         }
     }
 
-    private func complete(_ item: FocusItem) async {
-        setCompleted(item.milestone.id, to: ISO8601DateFormatter().string(from: Date()))
+    private func complete(_ item: FocusRow) async {
+        setCompleted(item.milestoneId, to: ISO8601DateFormatter().string(from: Date()))
         do {
             let earned: [EarnedBadge] = try await client
-                .rpc("complete_milestone", params: MilestoneParams(pMilestone: item.milestone.id))
+                .rpc("complete_milestone", params: MilestoneParams(pMilestone: item.milestoneId))
                 .execute().value
             activeDays.insert(Self.dayString(Date()))
             let names = earned.compactMap(\.badgeKey).map { badgeNames[$0] ?? $0 }
@@ -172,25 +127,28 @@ final class TodayModel {
                 celebrations.append(contentsOf: names)
             }
         } catch {
-            setCompleted(item.milestone.id, to: nil)
+            setCompleted(item.milestoneId, to: nil)
             toast = "That didn't save. Try again."
         }
     }
 
-    private func uncomplete(_ item: FocusItem) async {
-        let previous = item.milestone.completedAt
-        setCompleted(item.milestone.id, to: nil)
+    private func uncomplete(_ item: FocusRow) async {
+        let previous = item.completedAt
+        setCompleted(item.milestoneId, to: nil)
         do {
             try await client
-                .rpc("uncomplete_milestone", params: MilestoneParams(pMilestone: item.milestone.id))
+                .rpc("uncomplete_milestone", params: MilestoneParams(pMilestone: item.milestoneId))
                 .execute()
         } catch {
-            setCompleted(item.milestone.id, to: previous)
+            setCompleted(item.milestoneId, to: previous)
             toast = "That didn't save. Try again."
         }
     }
 
     private func setCompleted(_ id: UUID, to value: String?) {
+        if let f = focus.firstIndex(where: { $0.milestoneId == id }) {
+            focus[f].completedAt = value
+        }
         for g in goals.indices {
             if let m = goals[g].milestones.firstIndex(where: { $0.id == id }) {
                 goals[g].milestones[m].completedAt = value
