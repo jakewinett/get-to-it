@@ -1,0 +1,50 @@
+name: iOS build
+
+on:
+  pull_request:
+    paths:
+      - "ios/**"
+      - ".github/workflows/ios-build.yml"
+  push:
+    branches: [main]
+    paths:
+      - "ios/**"
+      - ".github/workflows/ios-build.yml"
+
+jobs:
+  build:
+    name: Generate project and build for simulator
+    runs-on: macos-15
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Placeholder config
+        run: |
+          cp Config/Secrets.xcconfig.example Config/Secrets.xcconfig
+          echo "SUPABASE_PUBLISHABLE_KEY = sb_publishable_ci_placeholder" >> Config/Secrets.xcconfig
+
+      - name: Generate Xcode project
+        run: xcodegen
+
+      - name: Build
+        run: |
+          xcodebuild build \
+            -project GetToIt.xcodeproj \
+            -scheme GetToIt \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            | tee build.log
+          exit ${PIPESTATUS[0]}
+
+      - name: Show errors
+        if: failure()
+        run: |
+          grep -E "error:" build.log | head -50 || true

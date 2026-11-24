@@ -27,8 +27,9 @@ Calm, and built to get you moving. Copy points at the next concrete step.
 | `supabase/migrations/` | Schema, RLS and app logic in SQL. Files are named with the version Supabase recorded |
 | `supabase/tests/` | `auth_stub.sql` (stand-in for Supabase auth and default grants) and `behavior.sql` (checks that raise on failure) |
 | `.github/workflows/db-check.yml` | CI: Postgres 17, apply all migrations, run behavior checks, on any change under `supabase/` |
+| `.github/workflows/ios-build.yml` | CI: macOS runner, `xcodegen` + simulator build, on any change under `ios/` |
 | `DECISIONS.md` | Product and technical decisions |
-| `ios/` | *Next:* SwiftUI app |
+| `ios/` | SwiftUI app, generated with XcodeGen from `ios/project.yml` (see `ios/README.md`) |
 | `web/` | *Later:* Next.js companion |
 
 ## Backend (Supabase)
@@ -61,7 +62,7 @@ the live Supabase project, and the Today screen reading real data.
 - Sign in with Apple, done natively: `ASAuthorizationAppleIDProvider` with a hashed nonce, then
   `supabase.auth.signInWithIdToken(credentials: .init(provider: .apple, idToken:, nonce:))`.
   Check the current supabase-swift docs for exact signatures.
-- Bundle ID: proposed `com.techvantage.gettoit`. Confirm with the user before creating it.
+- Bundle ID: `com.techvantage.gettoit` (confirmed).
 - Config: the Supabase URL and publishable (anon) key go in an xcconfig that is gitignored, with a
   committed `*.example` beside it. Never commit `.p8` keys, service-role keys or tokens.
 - Apple Developer setup the user must do (Claude can't): an App ID with Sign in with Apple, a
