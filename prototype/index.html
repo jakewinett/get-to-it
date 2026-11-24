@@ -335,7 +335,7 @@ input[type="time"].field { width: auto; padding: 8px 10px; }
 
 <script>
 const ICONS = {
-  cairn: '<svg viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="19" rx="7" ry="2.6"/><ellipse cx="12" cy="13.6" rx="5" ry="2.2"/><ellipse cx="12" cy="8.8" rx="3.4" ry="1.9"/><ellipse cx="12" cy="4.9" rx="2" ry="1.4"/></svg>',
+  mark: '<svg viewBox="0 0 24 24" fill="currentColor"><g transform="translate(8.3 13.2) rotate(-10) scale(1.1)"><path d="M0-3.6C2.15-3.6 2.75-1.3 2.5.7 2.3 2.6 1.35 3.6 0 3.6S-2.3 2.6-2.5.7C-2.75-1.3-2.15-3.6 0-3.6Z"/><ellipse cy="5.8" rx="1.75" ry="1.95"/></g><g transform="translate(15.7 5) rotate(10) scale(1.1)"><path d="M0-3.6C2.15-3.6 2.75-1.3 2.5.7 2.3 2.6 1.35 3.6 0 3.6S-2.3 2.6-2.5.7C-2.75-1.3-2.15-3.6 0-3.6Z"/><ellipse cy="5.8" rx="1.75" ry="1.95"/></g></svg>',
   sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg>',
   goals: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 5h11l-2.5 4L16 13H5"/></svg>',
   award: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></svg>',
@@ -479,7 +479,7 @@ function lockScreen() {
     <div class="date">Monday, November 23</div>
     <div class="time">7:30</div>
     <button class="notif" data-act="go:meditate">
-      <span class="appicon">${ICONS.cairn}</span>
+      <span class="appicon">${ICONS.mark}</span>
       <span><span class="spread"><b>Get To It</b><span class="small muted">now</span></span>
       <p>Good morning. ${n} steps today. First up: ${esc(goal(S.focus[0][0]).milestones[S.focus[0][1]].t)}.</p></span>
     </button>
@@ -673,7 +673,7 @@ function remindersScreen() {
 
     <h2>Notification preview</h2>
     <div class="card row" style="align-items:flex-start">
-      <span class="iconbtn" style="background:var(--accent);border:0;border-radius:10px;width:38px;height:38px;color:var(--accent-ink)">${ICONS.cairn}</span>
+      <span class="iconbtn" style="background:var(--accent);border:0;border-radius:10px;width:38px;height:38px;color:var(--accent-ink)">${ICONS.mark}</span>
       <div style="min-width:0"><b>Get To It</b><p style="margin:2px 0 0">${p.tone === "encouraging"
         ? "Good morning. 3 steps today. First up: Draft the agenda and send it over."
         : "3 steps today: workshop agenda, 3-mile run, module 3."}</p></div>
@@ -1148,6 +1148,6 @@ document.addEventListener("keydown", e => {
 });
 document.addEventListener("change", e => { if (e.target.id === "digestTime") S.prefs.time = e.target.value; });
 
-$("#brandMark").innerHTML = ICONS.cairn;
+$("#brandMark").innerHTML = ICONS.mark;
 render(true);
 </script>
