@@ -31,7 +31,7 @@ Name: **Get To It** (brand spelling GetToIt). Tagline: *Bring practice to your p
   couldn't reach it (every folder reported "not available").
 
 ## Backend
-- Supabase project **Get To It** (`dseikrlmwwbguyvdamif`), TechVantage LLC org, us-west-1. Live migrations: `init`, `harden_grants_and_fk_indexes`.
+- Supabase project **Get To It** (`dseikrlmwwbguyvdamif`), TechVantage LLC org, us-west-1. Live migrations: `init`, `harden_grants_and_fk_indexes`, `todays_focus`.
 - Migration files are named with the version Supabase recorded, so the CLI and the hosted project agree.
 - Badge, activity-day and swap-nudge rules live in SQL functions so iOS, web and the assistant behave the same:
   `complete_milestone`, `uncomplete_milestone`, `add_note`, `swap_focus_item`, `swap_streak`, `breakdown_milestone`.

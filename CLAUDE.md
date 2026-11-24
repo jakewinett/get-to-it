@@ -34,7 +34,8 @@ Calm, and built to get you moving. Copy points at the next concrete step.
 
 ## Backend (Supabase)
 - Project **Get To It**, ref `dseikrlmwwbguyvdamif`, org TechVantage LLC (Pro), region us-west-1.
-  Live migrations: `20261123200202_init`, `20261123200235_harden_grants_and_fk_indexes`.
+  Live migrations: `20261123200202_init`, `20261123200235_harden_grants_and_fk_indexes`,
+  `20261124172724_todays_focus`.
 - Business rules live in SQL so iOS, web and the assistant agree. Clients call these via RPC:
   `todays_focus()` returns today's steps (picks up to 3 once a day, one per goal, soonest due first;
   finished steps stay; tops up only while today has fewer than 3);
