@@ -46,7 +46,8 @@ Name: **Get To It** (brand spelling GetToIt). Tagline: *Bring practice to your p
 - **Xcode Cloud** builds and uploads to TestFlight on merges to `main`, so uploads don't need the Mac. `ios/ci_scripts/ci_post_clone.sh` regenerates the project and resolves packages; the publishable key is a workflow environment variable.
 - **Xcode version: 26.6**, pinned in both the Xcode Cloud workflow and GitHub CI (not "Latest Release").
   `Package.resolved` depends on the Swift version: Swift 6.4+ reads newer package manifests that add
-  `swift-issue-reporting`, so a mismatch makes Xcode Cloud reject the committed file. Upgrade both together.
+  `swift-issue-reporting`. Even with the pin, Xcode Cloud rejected the committed file, so its setup script
+  now lets it update `Package.resolved` before building (existing pins kept). GitHub CI still checks the file.
 - The generated Xcode project **is committed**: Xcode Cloud only lists a scheme that's shared and committed. `project.yml` stays the source of truth, and CI fails if the committed project doesn't match it.
 - iOS builds happen in a Claude Code session on the user's Mac. Remote Control from a cloud session
   couldn't reach it (every folder reported "not available").
