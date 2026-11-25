@@ -14,8 +14,8 @@ on:
 jobs:
   build:
     name: Generate project and build for simulator
-    # Match Xcode Cloud, which builds with "Latest Release". Package.resolved depends on the Swift
-    # version (newer Swift reads newer package manifests), so both must use the same Xcode.
+    # Xcode Cloud's workflow is pinned to the same Xcode (26.6). Keep them equal: Package.resolved
+    # depends on the Swift version (newer Swift reads newer package manifests).
     runs-on: macos-26
     timeout-minutes: 30
     defaults:
@@ -24,11 +24,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use the newest released Xcode
+      - name: Use Xcode 26.6 (same as Xcode Cloud)
         run: |
-          ls -d /Applications/Xcode*.app
-          latest=$(ls -d /Applications/Xcode_*.app | grep -E "/Xcode_[0-9.]+\.app$" | sort -V | tail -1)
-          sudo xcode-select -s "$latest"
+          sudo xcode-select -s /Applications/Xcode_26.6.app
           xcodebuild -version
           swift --version
 
