@@ -14,13 +14,23 @@ on:
 jobs:
   build:
     name: Generate project and build for simulator
-    runs-on: macos-15
+    # Match Xcode Cloud, which builds with "Latest Release". Package.resolved depends on the Swift
+    # version (newer Swift reads newer package manifests), so both must use the same Xcode.
+    runs-on: macos-26
     timeout-minutes: 30
     defaults:
       run:
         working-directory: ios
     steps:
       - uses: actions/checkout@v4
+
+      - name: Use the newest released Xcode
+        run: |
+          ls -d /Applications/Xcode*.app
+          latest=$(ls -d /Applications/Xcode_*.app | grep -E "/Xcode_[0-9.]+\.app$" | sort -V | tail -1)
+          sudo xcode-select -s "$latest"
+          xcodebuild -version
+          swift --version
 
       # Same script Xcode Cloud runs, so every PR also tests the Xcode Cloud setup:
       # writes the config, installs XcodeGen, generates the project, resolves packages.
