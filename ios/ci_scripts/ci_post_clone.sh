@@ -29,5 +29,20 @@ brew install xcodegen
 echo "Generating GetToIt.xcodeproj"
 xcodegen generate
 
+xcodebuild -version
+swift --version
+
+# Xcode Cloud only builds with the versions in Package.resolved, and refuses a file that is out of
+# date for its Xcode. Which packages are needed depends on the Swift version (newer Swift reads
+# newer package manifests), so let Xcode Cloud update the file here, keeping every existing pin.
+# GitHub's CI doesn't do this: it checks that the committed file is current for its Xcode.
+if [ "${CI_XCODE_CLOUD:-}" = "TRUE" ]; then
+  defaults write com.apple.dt.Xcode IDEPackageOnlyUseVersionsFromResolvedFile -bool NO
+  defaults write com.apple.dt.Xcode IDEDisableAutomaticPackageResolution -bool NO
+fi
+
 echo "Resolving Swift packages"
 xcodebuild -resolvePackageDependencies -project GetToIt.xcodeproj -scheme GetToIt
+
+# Show what changed, if anything, so it can be committed.
+git --no-pager diff -- GetToIt.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved || true
