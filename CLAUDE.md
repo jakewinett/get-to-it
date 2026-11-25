@@ -40,7 +40,8 @@ Calm, and built to get you moving. Copy points at the next concrete step.
   `20261124172724_todays_focus`.
 - Business rules live in SQL so iOS, web and the assistant agree. Clients call these via RPC:
   `todays_focus()` returns today's steps (picks up to 3 once a day, one per goal, soonest due first;
-  finished steps stay; tops up only while today has fewer than 3);
+  finished steps stay; tops up only while today has fewer than 3; goals added after the day's pick join
+  right away, up to `max_focus_items`, default 5);
   `complete_milestone(uuid)` and `add_note(goal, body, source)` return the badges earned;
   `uncomplete_milestone`, `swap_focus_item(out, in)` (returns the swap streak; show the
   break-it-down nudge at 3), `swap_streak`, `breakdown_milestone(uuid, text[])`.
