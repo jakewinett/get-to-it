@@ -14,13 +14,21 @@ on:
 jobs:
   build:
     name: Generate project and build for simulator
-    runs-on: macos-15
+    # Xcode Cloud's workflow is pinned to the same Xcode (26.6). Keep them equal: Package.resolved
+    # depends on the Swift version (newer Swift reads newer package manifests).
+    runs-on: macos-26
     timeout-minutes: 30
     defaults:
       run:
         working-directory: ios
     steps:
       - uses: actions/checkout@v4
+
+      - name: Use Xcode 26.6 (same as Xcode Cloud)
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.6.app
+          xcodebuild -version
+          swift --version
 
       # Same script Xcode Cloud runs, so every PR also tests the Xcode Cloud setup:
       # writes the config, installs XcodeGen, generates the project, resolves packages.
