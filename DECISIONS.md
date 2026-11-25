@@ -20,6 +20,8 @@ Name: **Get To It** (brand spelling GetToIt). Tagline: *Bring practice to your p
 - Target date: free text ("April 2027") **or** a date from the calendar button beside the field. A picked date
   saves `target_date` plus its label; typing over it turns it back into free text (`target_label` only).
 - Today's focus: the database (`todays_focus()`) picks up to 3 next steps once a day, one per goal, soonest due first. Finished steps stay on the list; it only tops up while today has fewer than 3. User can swap or add (max 5).
+  A goal added after the day's pick (form or assistant) joins today's list right away, up to that max of 5,
+  so a new goal is never invisible until tomorrow.
 - Swap nudge: a step swapped out 3 days running prompts a gentle offer to break it into smaller steps.
 - Consistency shown as "X of the last 7 days", not a fragile streak. Missed days never reset anything.
 - Rewards: badges that can't be lost (First Step, Showing Up, Steady, Fresh Start, Halfway, Summit, Long Game, Reflective, Balanced).
@@ -53,7 +55,7 @@ Name: **Get To It** (brand spelling GetToIt). Tagline: *Bring practice to your p
   couldn't reach it (every folder reported "not available").
 
 ## Backend
-- Supabase project **Get To It** (`dseikrlmwwbguyvdamif`), TechVantage LLC org, us-west-1. Live migrations: `init`, `harden_grants_and_fk_indexes`, `todays_focus`.
+- Supabase project **Get To It** (`dseikrlmwwbguyvdamif`), TechVantage LLC org, us-west-1. Live migrations: `init`, `harden_grants_and_fk_indexes`, `todays_focus`, `new_goals_join_today`.
 - Migration files are named with the version Supabase recorded, so the CLI and the hosted project agree.
 - Badge, activity-day and swap-nudge rules live in SQL functions so iOS, web and the assistant behave the same:
   `complete_milestone`, `uncomplete_milestone`, `add_note`, `swap_focus_item`, `swap_streak`, `breakdown_milestone`.

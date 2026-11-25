@@ -179,6 +179,33 @@ begin
   end if;
 end $$;
 
+-- A goal added after today's list was picked joins it, up to max_focus_items (5).
+-- created_at is set ahead of the pick explicitly: within one transaction now() doesn't move.
+insert into public.goals (category_id, title, created_at)
+select (select id from public.categories where name = 'Personal'), t, now() + (n || ' minutes')::interval
+from (values ('Added later', 1), ('Added later too', 2), ('Added last', 3)) v(t, n);
+insert into public.milestones (goal_id, title, position, due_date)
+select g.id, g.title || ' / step ' || k, k, case when g.title = 'Added later too' then public.local_today(auth.uid()) end
+from public.goals g, generate_series(1, 2) k
+where g.title in ('Added later', 'Added later too', 'Added last');
+
+do $$
+declare v_titles text[];
+begin
+  select array_agg(milestone_title order by sort_order) into v_titles from public.todays_focus();
+  if v_titles is distinct from array['Due today / step 1', 'No due date / step 1', 'Due next week / step 1',
+                                     'Added later too / step 1', 'Added later / step 1'] then
+    raise exception 'goals added after the pick should join today, soonest due first, up to 5; got %', v_titles;
+  end if;
+  if exists (select 1 from public.todays_focus() where milestone_title like 'Added last%') then
+    raise exception 'a sixth step must not be added past max_focus_items';
+  end if;
+  perform public.todays_focus();
+  if (select count(*) from public.focus_items where day = public.local_today(auth.uid()) and swapped_out_at is null) <> 5 then
+    raise exception 'calling todays_focus again must not add rows past the cap';
+  end if;
+end $$;
+
 -- A user with no goals gets an empty list; the first goal added mid-day is picked.
 reset role;
 insert into auth.users (id) values ('44444444-4444-4444-4444-444444444444');
