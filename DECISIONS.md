@@ -9,20 +9,34 @@ Name: **Get To It** (brand spelling GetToIt). Tagline: *Bring practice to your p
 - Personal goal app for one user. Calm and rewarding to use, built to get you moving; never punishing.
 - Mobile-first (iOS primary). Web companion for planning and long-form notes.
 - Morning flow: one daily digest notification → today's thought → Today screen.
+- **Daily reminder (build 2): local notifications**, not push yet. The user turns it on and picks the time
+  (Today → ⋯ → Daily reminder). It shows the day's thought and the step to work on: today's first unfinished
+  focus step, else the open milestone most recently due, else the next one coming due. Local notifications are
+  fixed when scheduled, so the app schedules 14 days ahead each time Today loads or a step changes; if the app
+  isn't opened, later reminders show the step as it was. The time is also saved to `profiles.digest_time`
+  so the server-sent digest (later) uses it. On/off is per device.
 - Daily thoughts: curated library **plus** phrases the user adds or saves (option C).
 - Goals: categories (Professional, Personal, Physical, plus user-created), horizons (short / mid / long), measured by **milestones**, with notes and updates.
+- Target date: free text ("April 2027") **or** a date from the calendar button beside the field. A picked date
+  saves `target_date` plus its label; typing over it turns it back into free text (`target_label` only).
 - Today's focus: the database (`todays_focus()`) picks up to 3 next steps once a day, one per goal, soonest due first. Finished steps stay on the list; it only tops up while today has fewer than 3. User can swap or add (max 5).
 - Swap nudge: a step swapped out 3 days running prompts a gentle offer to break it into smaller steps.
 - Consistency shown as "X of the last 7 days", not a fragile streak. Missed days never reset anything.
 - Rewards: badges that can't be lost (First Step, Showing Up, Steady, Fresh Start, Halfway, Summit, Long Game, Reflective, Balanced).
 - Reminders: one digest per day, tone Encouraging or Plain, optional long-term nudge and Sunday recap.
-- Assistant ("Ask"): text or voice; can answer about goals, log updates, add goals, swap steps, save thoughts, navigate, and give inspiration (quote, short story, idiom, Buddhist wisdom). Every app function should be reachable as an assistant action.
+- Assistant ("Ask"): opened from the mic button at the bottom of Today, and starts listening right away.
+  Text or voice; can answer about goals, log updates, add goals, swap steps, save thoughts, navigate, and give inspiration (quote, short story, idiom, Buddhist wisdom). Every app function should be reachable as an assistant action.
 - App mark: two footprints stepping upward on the teal accent tile.
 - Voice replies: on automatically with headphones (iOS detection); off by default without headphones, with a toggle.
 
 ## Platform
 - Backend: Supabase (Postgres, auth, edge functions).
-- AI: Claude via a Supabase Edge Function, app actions exposed as tools.
+- AI: Claude via a Supabase Edge Function, app actions exposed as tools. The `assistant` function
+  (`supabase/functions/assistant`) runs the tool loop as the signed-in user (RLS applies), logs each turn to
+  `assistant_turns`, and needs the `ANTHROPIC_API_KEY` secret. First tools: add/update goal, add/update
+  milestone, complete milestone, add note. Model `claude-opus-5-5` at low effort, with server-side refusal fallback.
+- Voice input: Speech framework, on-device when the phone supports it; sends after a short pause.
+  Spoken replies (headphones rule above) are not built yet.
 - Distribution: TestFlight only, single user for now.
 - Auth: Sign in with Apple.
 - Stack: **SwiftUI** iOS app + **Next.js** web companion, both on Supabase.

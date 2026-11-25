@@ -30,17 +30,6 @@ jobs:
           SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
         run: ./ci_scripts/ci_post_clone.sh
 
-      # The project is committed (Xcode Cloud needs the shared scheme in the repo). The script above
-      # regenerated it from project.yml, so any difference means someone forgot to run xcodegen.
-      - name: Check committed project matches project.yml
-        run: |
-          if [ -n "$(git status --porcelain -- GetToIt.xcodeproj GetToIt/Info.plist GetToIt/GetToIt.entitlements)" ]; then
-            echo "::error::The committed Xcode project is out of date. Run 'xcodegen' in ios/ and commit the result."
-            git status --porcelain -- GetToIt.xcodeproj GetToIt/Info.plist GetToIt/GetToIt.entitlements
-            git diff --stat -- GetToIt.xcodeproj
-            exit 1
-          fi
-
       - name: Build
         run: |
           xcodebuild build \
@@ -51,6 +40,20 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             | tee build.log
           exit ${PIPESTATUS[0]}
+
+      # The project is committed (Xcode Cloud needs the shared scheme in the repo). The script above
+      # regenerated it from project.yml, so any difference means someone forgot to run xcodegen.
+      # Runs after the build so its diff is at the end of the log, where log tools can reach it.
+      - name: Check committed project matches project.yml
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -n "$(git status --porcelain -- GetToIt.xcodeproj GetToIt/Info.plist GetToIt/GetToIt.entitlements)" ]; then
+            echo "::error::The committed Xcode project is out of date. Run 'xcodegen' in ios/ and commit the result."
+            git status --porcelain -- GetToIt.xcodeproj GetToIt/Info.plist GetToIt/GetToIt.entitlements
+            # The full diff, so a session without XcodeGen (a Linux cloud container) can apply it.
+            git diff -- GetToIt.xcodeproj GetToIt/Info.plist GetToIt/GetToIt.entitlements
+            exit 1
+          fi
 
       - name: Show errors
         if: failure()

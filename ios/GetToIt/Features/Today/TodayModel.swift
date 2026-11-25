@@ -17,6 +17,7 @@ final class TodayModel {
     var celebrations: [String] = []
 
     private var badgeNames: [String: String] = [:]
+    private var thoughts: [Thought] = []
     private let client = Backend.client
 
     private static let encouragement = [
@@ -85,14 +86,41 @@ final class TodayModel {
             activeDays = Set(days.map(\.day))
             badgeNames = Dictionary(badges.map { ($0.key, $0.name) }, uniquingKeysWith: { first, _ in first })
 
-            if !thoughts.isEmpty {
-                let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
-                thought = thoughts[dayOfYear % thoughts.count]
-            }
+            self.thoughts = thoughts
+            thought = Self.thought(for: Date(), in: thoughts)
+            await refreshReminder()
         } catch {
             errorMessage = "Couldn't load your goals. Check your connection and pull to refresh."
         }
         isLoading = false
+    }
+
+    /// The day's thought. Picked the same way for the Today card and the daily reminder.
+    static func thought(for day: Date, in thoughts: [Thought]) -> Thought? {
+        guard !thoughts.isEmpty else { return nil }
+        let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: day) ?? 0
+        return thoughts[dayOfYear % thoughts.count]
+    }
+
+    // MARK: Daily reminder
+
+    /// Reschedules the next two weeks of reminders from what's loaded now.
+    func refreshReminder() async {
+        await DailyReminder.reschedule(thoughts: thoughts, goals: goals, focus: focus)
+    }
+
+    var tomorrowsReminder: DailyReminder.Content {
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+        return DailyReminder.content(for: tomorrow, thoughts: thoughts, goals: goals, focus: [])
+    }
+
+    /// Saves the reminder time on the profile too, so a server-sent digest later uses the same time.
+    func reminderChanged(minutes: Int, userID: UUID) async {
+        await refreshReminder()
+        _ = try? await client.from("profiles")
+            .update(["digest_time": String(format: "%02d:%02d", minutes / 60, minutes % 60)])
+            .eq("id", value: userID.uuidString)
+            .execute()
     }
 
     /// "Today" on the server follows the profile's time zone, so keep it matched to the phone.
@@ -120,6 +148,7 @@ final class TodayModel {
                 .rpc("complete_milestone", params: MilestoneParams(pMilestone: item.milestoneId))
                 .execute().value
             activeDays.insert(Self.dayString(Date()))
+            await refreshReminder()
             let names = earned.compactMap(\.badgeKey).map { badgeNames[$0] ?? $0 }
             if names.isEmpty {
                 toast = Self.encouragement.randomElement()
@@ -139,6 +168,7 @@ final class TodayModel {
             try await client
                 .rpc("uncomplete_milestone", params: MilestoneParams(pMilestone: item.milestoneId))
                 .execute()
+            await refreshReminder()
         } catch {
             setCompleted(item.milestoneId, to: previous)
             toast = "That didn't save. Try again."
@@ -156,10 +186,12 @@ final class TodayModel {
         }
     }
 
-    func addGoal(title: String, category: Category, horizon: String, target: String, steps: [String], userID: UUID) async -> Bool {
+    func addGoal(title: String, category: Category, horizon: String, target: String, targetDate: Date?,
+                 steps: [String], userID: UUID) async -> Bool {
         do {
             let inserted: InsertedID = try await client.from("goals")
                 .insert(NewGoal(title: title, categoryId: category.id, horizon: horizon,
+                                targetDate: targetDate.map(Self.dayString),
                                 targetLabel: target.isEmpty ? nil : target))
                 .select("id")
                 .single()

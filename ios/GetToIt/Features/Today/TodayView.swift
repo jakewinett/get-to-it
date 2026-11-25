@@ -4,6 +4,8 @@ struct TodayView: View {
     @Environment(AuthModel.self) private var auth
     @State private var model = TodayModel()
     @State private var showingAddGoal = false
+    @State private var showingAssistant = false
+    @State private var showingReminder = false
 
     private var userID: UUID? {
         if case let .signedIn(id) = auth.state { return id }
@@ -34,7 +36,7 @@ struct TodayView: View {
                     }
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 32)
+                .padding(.bottom, 112) // room for the mic button
             }
             .background(Theme.surface)
             .refreshable { await reload() }
@@ -42,6 +44,7 @@ struct TodayView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Button("Add a goal", systemImage: "plus") { showingAddGoal = true }
+                        Button("Daily reminder", systemImage: "bell") { showingReminder = true }
                         Button("Sign out", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
                             Task { await auth.signOut() }
                         }
@@ -51,13 +54,32 @@ struct TodayView: View {
                 }
             }
             .sheet(isPresented: $showingAddGoal) {
-                AddGoalSheet(categories: model.categories) { title, category, horizon, target, steps in
+                AddGoalSheet(categories: model.categories) { title, category, horizon, target, targetDate, steps in
                     guard let userID else { return false }
                     return await model.addGoal(title: title, category: category, horizon: horizon,
-                                               target: target, steps: steps, userID: userID)
+                                               target: target, targetDate: targetDate, steps: steps, userID: userID)
                 }
             }
-            .overlay(alignment: .bottom) { toastView }
+            .sheet(isPresented: $showingAssistant) {
+                AssistantView { changed, badges in
+                    model.celebrations.append(contentsOf: badges)
+                    if changed { Task { await reload() } }
+                }
+            }
+            .sheet(isPresented: $showingReminder) {
+                ReminderSettingsView(preview: model.tomorrowsReminder) { minutes in
+                    guard let userID else { return }
+                    await model.reminderChanged(minutes: minutes, userID: userID)
+                }
+            }
+            .overlay(alignment: .bottom) {
+                VStack(spacing: 12) {
+                    toastView
+                    MicButton(size: 64) { showingAssistant = true }
+                        .shadow(color: Theme.ink.opacity(0.18), radius: 10, y: 4)
+                }
+                .padding(.bottom, 12)
+            }
             .overlay { celebrationView }
             .task { await reload() }
         }
@@ -261,7 +283,6 @@ struct TodayView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
                 .background(Theme.ink, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .padding(.bottom, 24)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
                 .task(id: toast) {
                     try? await Task.sleep(for: .seconds(2.6))

@@ -22,6 +22,10 @@
 	<string>1</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Get To It listens when you tap the mic, so you can add and update goals by voice.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Get To It turns what you say into text for the assistant.</string>
 	<key>SupabasePublishableKey</key>
 	<string>$(SUPABASE_PUBLISHABLE_KEY)</string>
 	<key>SupabaseURL</key>
